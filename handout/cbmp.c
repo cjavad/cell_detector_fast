@@ -389,7 +389,7 @@ void _map(BMP* bmp, void (*f)(BMP*, int, int, int))
         }
     }
 }
-switch
+
 void _get_pixel(BMP* bmp, int index, int offset, int channel)
 {
     unsigned char value = _get_int_from_buffer(sizeof(unsigned char), offset + channel, bmp->file_byte_contents);

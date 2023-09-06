@@ -47,10 +47,10 @@ int main(int argc, char** argv)
   read_bitmap(argv[1], input_image);
 
   //Run inversion
-  invert(input_image,output_image);
+  // invert(input_image,output_image);
 
   //Save image to file
-  write_bitmap(output_image, argv[2]);
+  write_bitmap(input_image, argv[2]);
 
   printf("Done!\n");
   return 0;

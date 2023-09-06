@@ -5,10 +5,9 @@
 
 #include <string.h>
 
-void read_bitmap(struct BitmapHeader* header, struct BitmapInfoHeader* infoHeader, struct Bitmap* bitmap, const char* filepath)
+void read_bitmap(FILE* fp, BitmapHeader* header, BitmapInfoHeader* infoHeader, Bitmap* bitmap)
 {
 	// read bitmap
-	FILE* fp = fopen(filepath, "r");
 	fseek(fp, 0, SEEK_END);
 	uint32_t flen = ftell(fp);
 	fseek(fp, 0, SEEK_SET);
@@ -16,25 +15,8 @@ void read_bitmap(struct BitmapHeader* header, struct BitmapInfoHeader* infoHeade
 	void* file = malloc(flen);
 	fread(file, 1, flen, fp);
 
-	fclose(fp);
-
-	header->magic 					= *(uint16_t*)(file + 0 + 0);
-	header->size 					= *(uint32_t*)(file + 0 + 2);
-	header->r0 						= *(uint16_t*)(file + 0 + 6);
-	header->r1 						= *(uint16_t*)(file + 0 + 8);
-	header->offset 					= *(uint16_t*)(file + 0 + 10);
-
-	infoHeader->size 				= *(uint32_t*)(file + 14 + 0);
-	infoHeader->width 				= *( int32_t*)(file + 14 + 4);
-	infoHeader->height				= *( int32_t*)(file + 14 + 8);
-	infoHeader->planes				= *(uint16_t*)(file + 14 + 12);
-	infoHeader->bpp					= *(uint16_t*)(file + 14 + 14);
-	infoHeader->compression			= *(uint32_t*)(file + 14 + 16);
-	infoHeader->image_size			= *(uint32_t*)(file + 14 + 20);
-	infoHeader->h_resolution		= *(uint32_t*)(file + 14 + 24);
-	infoHeader->v_resolution		= *(uint32_t*)(file + 14 + 28);
-	infoHeader->palette_size		= *(uint32_t*)(file + 14 + 32);
-	infoHeader->important_colors	= *(uint32_t*)(file + 14 + 36);
+    memcpy(header, file, sizeof(BitmapHeader));
+    memcpy(infoHeader, file + sizeof(BitmapHeader), sizeof(BitmapInfoHeader));
 
 	bitmap->width		= infoHeader->width;
 	bitmap->height		= infoHeader->height;
@@ -47,4 +29,18 @@ void read_bitmap(struct BitmapHeader* header, struct BitmapInfoHeader* infoHeade
 	memcpy(bitmap->data, file + header->offset, bitmap->row_width * bitmap->height);
 
 	free(file);
+}
+
+void write_bitmap(FILE *fp, BitmapHeader *header, BitmapInfoHeader *infoHeader, Bitmap *bitmap) {
+    // write bitmap
+    uint32_t flen = header->offset + bitmap->row_width * bitmap->height;
+    void* file = malloc(flen);
+
+    memcpy(file, header, sizeof(BitmapHeader));
+    memcpy(file + sizeof(BitmapHeader), infoHeader, sizeof(BitmapInfoHeader));
+    memcpy(file + header->offset, bitmap->data, bitmap->row_width * bitmap->height);
+
+    fwrite(file, 1, flen, fp);
+
+    free(file);
 }
