@@ -5,7 +5,7 @@
 
 typedef struct __attribute__((__packed__))
 {
-	uint8_t magic[2];
+	uint8_t  magic[2];
 	uint32_t size;
 	uint16_t r0;
 	uint16_t r1;
@@ -15,8 +15,8 @@ typedef struct __attribute__((__packed__))
 typedef struct __attribute__((__packed__))
 {
 	uint32_t size; // 40
-	int32_t width;
-	int32_t height;
+	int32_t  width;
+	int32_t  height;
 	uint16_t planes;
 	uint16_t bpp;
 	uint32_t compression;

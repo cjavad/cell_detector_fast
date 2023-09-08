@@ -14,16 +14,16 @@ int32_t main()
 {
     FILE* fp = fopen("res/5IMPOSSIBLE.bmp", "rb");
 
-	BitmapHeader header;
-	BitmapInfoHeader infoHeader;
-	Bitmap bitmap;
+	BitmapHeader      header;
+	BitmapInfoHeader  infoHeader;
+	Bitmap            bitmap;
 
 	read_bitmap(fp, &header, &infoHeader, &bitmap);
 
     fclose(fp);
 
-	printf("Magic = %.2s\n", (char *) &header.magic);
-	printf("Size = %ix%i\n", infoHeader.width, infoHeader.height);
+	printf("Magic          = %.2s\n", (char *) &header.magic);
+	printf("Size           = %ix%i\n", infoHeader.width, infoHeader.height);
 	printf("Bits per pixel = %u\n", infoHeader.bpp);
 
     fp = fopen("res/out.bmp", "wb");
@@ -32,9 +32,9 @@ int32_t main()
     bmp_to_grayscale(&bitmap, &image);
 
 	GrayScale output;
-	output.width = image.width;
+	output.width  = image.width;
 	output.height = image.height;
-	output.data = malloc(output.width * output.height * sizeof(uint8_t));
+	output.data   = malloc(output.width * output.height * sizeof(uint8_t));
 	// blur_pass(&output, &image);
 	// range_pass(&output, &output, 64, 192);
 	// blur_pass(&image, &output);
