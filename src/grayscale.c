@@ -18,7 +18,7 @@ void bmp_to_grayscale(Bitmap *bitmap, GrayScale *image) {
             uint8_t b = bitmap->data[y * bitmap->row_width + x * bitmap->byte_pp + 2];
 
             // Filter really close-to-black pixels away from the r channel e(only one we care about)
-            image->data[y * image->width + x] = r >> 6 << 6;
+            image->data[y * image->width + x] = r ;//>= 128 ? 255 : 0;
         }
     }
 }
@@ -36,7 +36,6 @@ void write_grayscale(FILE *fp, GrayScale *image) {
     header.r0 = 0;
     header.r1 = 0;
     header.offset = sizeof(BitmapHeader) + sizeof(BitmapInfoHeader);
-
 
     infoHeader.size = sizeof(BitmapInfoHeader);
     infoHeader.width = image->width;
@@ -56,10 +55,10 @@ void write_grayscale(FILE *fp, GrayScale *image) {
     bitmap.row_width = row_width;
     bitmap.data = malloc(bitmap.row_width * bitmap.height);
 
-    printf("row_width: %u\n", bitmap.row_width);
-    printf("height: %u\n", bitmap.height);
-    printf("width: %u\n", bitmap.width);
-    printf("pp: %u\n", bitmap.byte_pp);
+    // printf("row_width: %u\n", bitmap.row_width);
+    // printf("height: %u\n", bitmap.height);
+    // printf("width: %u\n", bitmap.width);
+    // printf("pp: %u\n", bitmap.byte_pp);
 
     for (uint32_t y = 0; y < image->height; y++) {
         for (uint32_t x = 0; x < image->width; x++) {
