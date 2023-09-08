@@ -40,10 +40,11 @@ int32_t main()
 	// blur_pass(&image, &output);
 	range_pass(&image, &image, 64, 255);
 	range_pass(&image, &image, 32, 33);
+	edge_pass(&output, &image);
 	// blur_pass(&output, &image);
 	// range_pass(&output, &output, 64, 192);
 
-    write_grayscale(fp, &image);
+    write_grayscale(fp, &output);
 
     fclose(fp);
 
@@ -92,5 +93,17 @@ void range_pass(GrayScale* dest, GrayScale* src, uint8_t min, uint8_t max)
 
 void edge_pass(GrayScale* dest, GrayScale* src)
 {
-	
+	for (uint32_t y = 0; y < src->height; y++)
+	{
+		uint32_t offset = y * src->height;
+		for (uint32_t x = 0; x < src->width; x++)
+		{
+			uint32_t average = ( 
+					getPixel(src, x - 1, y - 1) * 0 + getPixel(src, x, y - 1) * 1 + getPixel(src, x + 1, y - 1) * 0  +
+					getPixel(src, x - 1, y)     * 1 + getPixel(src, x, y)     * -4 + getPixel(src, x + 1, y)     * 1  +
+					getPixel(src, x - 1, y + 1) * 0 + getPixel(src, x, y + 1) * 1 + getPixel(src, x + 1, y + 1) * 0
+			);
+			dest->data[offset + x] = average;
+		}
+	}
 }
