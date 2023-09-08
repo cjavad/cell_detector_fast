@@ -12,7 +12,7 @@ void edge_pass(GrayScale* dest, GrayScale* src);
 
 int32_t main()
 {
-    FILE* fp = fopen("res/5IMPOSSIBLE.bmp", "rb");
+    FILE* fp = fopen("res/example.bmp", "rb");
 
 	BitmapHeader header;
 	BitmapInfoHeader infoHeader;
@@ -35,14 +35,9 @@ int32_t main()
 	output.width = image.width;
 	output.height = image.height;
 	output.data = malloc(output.width * output.height * sizeof(uint8_t));
-	// blur_pass(&output, &image);
-	// range_pass(&output, &output, 64, 192);
-	// blur_pass(&image, &output);
 	range_pass(&image, &image, 64, 255);
 	range_pass(&image, &image, 32, 33);
 	edge_pass(&output, &image);
-	// blur_pass(&output, &image);
-	// range_pass(&output, &output, 64, 192);
 
     write_grayscale(fp, &output);
 
@@ -53,8 +48,8 @@ int32_t main()
 
 uint32_t getPixel(GrayScale* image, int64_t x, int64_t y)
 {
-	if (x < 0 || x > image->width) return 0;
-	if (y < 0 || y > image->height) return 0;
+	if (x < 0 || x >= image->width) return 0;
+	if (y < 0 || y >= image->height) return 0;
 	return image->data[y * image->width + x];
 }
 
