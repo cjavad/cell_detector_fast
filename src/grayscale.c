@@ -30,7 +30,8 @@ void write_grayscale(FILE *fp, GrayScale *image) {
 
     uint32_t row_width = (3 * image->width + 3) & ~3;
 
-    header.magic = 0x4D42;
+    header.magic[0] = 0x42;
+    header.magic[1] = 0x4D;
     header.size = sizeof(BitmapHeader) + sizeof(BitmapInfoHeader) + row_width * image->height;
     header.r0 = 0;
     header.r1 = 0;

@@ -5,7 +5,7 @@
 
 typedef struct __attribute__((__packed__))
 {
-	uint16_t magic;
+	uint8_t magic[2];
 	uint32_t size;
 	uint16_t r0;
 	uint16_t r1;
