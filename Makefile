@@ -42,7 +42,7 @@ D_FILES := $(patsubst $(SRCDIR)/%.c, $(DEPDIR)/%.d, $(C_FILES))
 O_FILES := $(patsubst $(SRCDIR)/%.c, $(OBJDIR)/%.o, $(C_FILES))
 
 IR_FILES := $(shell find $(RESDIR) -type f -name "*")
-OR_FILES := $(patsubst $(SRCDIR)/%, $(BINDIR)/$(RESDIR)/%, $(IR_FILES))
+OR_FILES := $(patsubst $(RESDIR)/%, $(BINDIR)/$(RESDIR)/%, $(IR_FILES))
 
 include $(D_FILES)
 
