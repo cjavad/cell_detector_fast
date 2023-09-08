@@ -21,7 +21,7 @@ void read_bitmap(FILE* fp, BitmapHeader* header, BitmapInfoHeader* infoHeader, B
 	bitmap->width		= infoHeader->width;
 	bitmap->height		= infoHeader->height;
 	bitmap->byte_pp		= infoHeader->bpp >> 3;
-	bitmap->row_width 	= ((bitmap->width * bitmap->byte_pp + 3) >> 2) << 2;
+	bitmap->row_width 	= (bitmap->width * bitmap->byte_pp + 3) & (~3);
 	bitmap->data 		= malloc(bitmap->row_width * bitmap->height);
 
 	// if (bitmap->row_width * bitmap->height != infoHeader->image_size); // oh no
