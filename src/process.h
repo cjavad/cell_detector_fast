@@ -5,4 +5,4 @@
 #include "bitmap.h"
 #include "grayscale.h"
 
-void mark_cells(BitmapData* outbmp, GrayScale* input);
+void mark_cells(BitmapData* outbmp);

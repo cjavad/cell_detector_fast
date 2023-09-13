@@ -8,6 +8,8 @@
 #include "erode.h"
 #include "samples.h"
 
+#include "process.h"
+
 int32_t main()
 {
     uint32_t count;
@@ -27,8 +29,12 @@ int32_t main()
 
         samples[i]->output_bmp = &inputImage;
 
+        mark_cells(&inputImage.bitmap);
+
         // grayscale_to_bmp(samples[i]->output_bmp, GrayScale *output);
         write_sample(samples[i]);
+
+        break;
 
     }
 
