@@ -109,31 +109,36 @@ void mark_cells(BitmapData* outbmp)
 	PixelList whites;
 	whites.count = 0;
 	filter(image, image, &whites, 88);
-	
+
+#ifdef DEBUG
 	printf("%u whites in total\n", whites.count);
 
     FILE* fp = fopen("res/pass0.bmp", "wb");
     write_grayscale(fp, image);
     fclose(fp);
     int pc = 1;
+#endif
 
 	while (whites.count) {
 		// debug_snapshot(pc, image, buffer, &whites);
 		detect_pass(outbmp, image, &whites);
 		erode_pass(buffer, image, &whites);
 
+#ifdef DEBUG
         char out[512];
         sprintf(out, "res/pass%u.bmp", pc);
         FILE* fp = fopen(out, "wb");
         write_grayscale(fp, buffer);
         fclose(fp);
-
+#endif
 		swap(image, buffer);
 
 		remove_black_pixels(image, buffer, &whites);
 
+#ifdef DEBUG
 		printf("%u whites remain\n", whites.count);
 	    pc++;
+#endif
     }
 }
 
@@ -173,7 +178,6 @@ void remove_black_pixels(GrayScale* image, GrayScale* buffer, PixelList* pixels)
 		pixels->p[write].y = y;
 		write++; 
 	}
-	printf("removed %u pixels\n", pixels->count - write);
 	pixels->count = write;
 }
 
@@ -200,7 +204,7 @@ void erode_pass(GrayScale* output, GrayScale* input, PixelList* pixels)
 	}
 }
 
-#define DETECT_SIZE 7
+#define DETECT_SIZE 11
 #define RSIZE 3
 
 void detect_cell(BitmapData* bmp, GrayScale* input,int32_t cx, int32_t cy);
@@ -218,6 +222,7 @@ void detect_pass(BitmapData* outbmp, GrayScale* image, PixelList* pixels)
 
 void detect_cell(BitmapData* bmp, GrayScale* image, int32_t cx, int32_t cy)
 {
+	// exclusion zone check
 	{
 		int32_t minx = max(0, cx - (DETECT_SIZE /  2 + 1));
 		int32_t maxx = min((int32_t)image->width, cx + (DETECT_SIZE / 2 + 1) + 1);
@@ -244,6 +249,7 @@ void detect_cell(BitmapData* bmp, GrayScale* image, int32_t cx, int32_t cy)
 		if (exclude) return;
 	}
 
+	// cell check
 	{
 		int32_t minx = max(0, cx - (DETECT_SIZE /  2));
 		int32_t maxx = min((int32_t)image->width, cx + (DETECT_SIZE / 2) + 1);
@@ -256,21 +262,23 @@ void detect_cell(BitmapData* bmp, GrayScale* image, int32_t cx, int32_t cy)
 		{
 			for (int32_t x = minx; x < maxx; x++)
 			{
-				found += image->data[y * image->height + x];
+				found += image->data[y * image->width + x];
 			}	
 		}
 
 		if (!found) return;
 
+		// remove cell
 		for (int32_t y = miny; y < maxy; y++)
 		{
 			for (int32_t x = minx; x < maxx; x++)
 			{
-				image->data[y * image->height + x] = 0;
+				image->data[y * image->width + x] = 0;
 			}
 		}
 	}
 
+	// mark image
     {
         int32_t minx = max(0, cx - RSIZE);
         int32_t maxx = min((int32_t)image->width, cx + RSIZE + 1);
@@ -282,8 +290,11 @@ void detect_cell(BitmapData* bmp, GrayScale* image, int32_t cx, int32_t cy)
         {
             for (int32_t x = minx; x < maxx; x++)
             {
-                if ((cy - y) * (cy - y) + (cx - x) * (cx - x) > RSIZE * RSIZE) continue;
-                bmp->data[y * bmp->row_width + (x*3) + 2] = 255;
+				uint32_t dist = (cy - y) * (cy - y) + (cx - x) * (cx - x);
+                // if (dist > RSIZE * RSIZE) continue;
+				bmp->data[y * bmp->row_width + (x * 3) + 0] = 0;
+				bmp->data[y * bmp->row_width + (x * 3) + 1] = 0;
+                bmp->data[y * bmp->row_width + (x * 3) + 2] = 255;
             }
         }
     }
