@@ -1,5 +1,6 @@
 #include "samples.h"
 #include "bitmap.h"
+#include <sys/stat.h>
 
 const char* SAMPLE_TYPES[] = {
     "easy",
@@ -11,6 +12,19 @@ const char* SAMPLE_TYPES[] = {
 
 void resolve_sample_path(char* output, uint8_t sample_type, char* sample_name) {
     sprintf(output, "../../samples/%s", SAMPLE_TYPES[sample_type]);
+
+    if (sample_name) {
+        sprintf(output + strlen(output), "/%s.bmp", sample_name);
+    }
+}
+
+void resolve_output_path(char* output, uint8_t sample_type, char* sample_name) {
+    sprintf(output, "./res/%s", SAMPLE_TYPES[sample_type]);
+
+    // if directory does not exist, create it
+    if (mkdir(output, 0777) == -1) {
+        // Directory already exists
+    }
 
     if (sample_name) {
         sprintf(output + strlen(output), "/%s.bmp", sample_name);
@@ -81,7 +95,7 @@ void get_samples(sample_t*** samples, uint32_t* count, uint8_t sample_type) {
 void write_sample(sample_t *sample) {
     char* path = malloc(512);
     
-    resolve_sample_path(path, sample->sample_type, sample->sample_name);
+    resolve_output_path(path, sample->sample_type, sample->sample_name);
 
     FILE* fp = fopen(path, "wb");
 

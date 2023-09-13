@@ -5,8 +5,11 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
 #include "bitmap.h"
+
 
 
 #define EASY 0
@@ -21,8 +24,8 @@ typedef struct {
     BitmapImage* output_bmp;
 } sample_t;
 
-// Figure this out.
 void resolve_sample_path(char* output, uint8_t sample_type, char* sample_name);
+void resolve_output_path(char* output, uint8_t sample_type, char* sample_name);
 
 void get_samples(sample_t*** samples, uint32_t* count, uint8_t sample_type);
 
