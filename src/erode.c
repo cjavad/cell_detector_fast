@@ -42,8 +42,17 @@ void erode_pass(GrayScale* output, GrayScale* input)
 
 #define DETECT_SIZE 13
 
-uint32_t detect_cell(GrayScale* output, GrayScale* input, GrayScale* final, int32_t x, int32_t y)
+uint32_t detect_cell(GrayScale* output, GrayScale* input, GrayScale* final, int32_t cx, int32_t cy)
 {
+	uint32_t exclude = 0;
+	for (int32_t x = cx - DETECT_SIZE / 2; x < cx + DETECT_SIZE / 2 + 1; x++)
+	{
+
+	}
+	for (int32_t y = cy - DETECT_SIZE / 2; y < cy + DETECT_SIZE / 2 + 1; y++)
+	{
+
+	}
 
 }
 
