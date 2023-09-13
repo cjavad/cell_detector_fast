@@ -31,7 +31,7 @@ void init_gray(GrayScale* dest, uint32_t width, uint32_t height)
 }
 
 void grayscale_to_bmpdata(BitmapData *dest, GrayScale *src) {
-    printf("Writing grayscale\n");
+    // printf("Writing grayscale\n");
 
     for (uint32_t y = 0; y < src->height; y++) {
         for (uint32_t x = 0; x < src->width; x++) {

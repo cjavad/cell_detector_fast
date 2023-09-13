@@ -18,7 +18,7 @@ typedef struct {
 } PixelList;
 
 void filter(GrayScale* output, GrayScale* input, PixelList* pixels, uint8_t thold);
-void remove_black_pixels(GrayScale* image, PixelList* pixels);
+void remove_black_pixels(GrayScale* image, GrayScale* buffer, PixelList* pixels);
 void erode_pass(GrayScale* output, GrayScale* input, PixelList* pixels);
 void detect_pass(BitmapData* outbmp, GrayScale* image, PixelList* pixels);
 
@@ -30,6 +30,71 @@ uint64_t sum_pixels(GrayScale* image)
 		sum += image->data[i];
 	}
 	return sum;
+}
+
+#include <stdlib.h>
+void create_bitmap(BitmapImage* bmp, uint32_t width, uint32_t height)
+{
+	uint32_t row_width = (3 * width + 3) & ~3;
+
+    bmp->header.magic[0] = 0x42;
+    bmp->header.magic[1] = 0x4D;
+    bmp->header.size = sizeof(BitmapHeader) + sizeof(BitmapInfoHeader) + row_width * height;
+    bmp->header.r0 = 0;
+    bmp->header.r1 = 0;
+    bmp->header.offset = sizeof(BitmapHeader) + sizeof(BitmapInfoHeader);
+
+    bmp->infoHeader.size = sizeof(BitmapInfoHeader);
+    bmp->infoHeader.width = width;
+    bmp->infoHeader.height = height;
+    bmp->infoHeader.planes = 1;
+    bmp->infoHeader.bpp = 24;
+    bmp->infoHeader.compression = 0;
+    bmp->infoHeader.image_size = row_width * height;
+    bmp->infoHeader.h_resolution = 0;
+    bmp->infoHeader.v_resolution = 0;
+    bmp->infoHeader.palette_size = 0;
+    bmp->infoHeader.important_colors = 0;
+
+    bmp->bitmap.width = width;
+    bmp->bitmap.height = height;
+    bmp->bitmap.byte_pp = 3;
+    bmp->bitmap.row_width = row_width;
+    bmp->bitmap.data = malloc(bmp->bitmap.row_width * bmp->bitmap.height);
+}
+
+void debug_snapshot(uint32_t id, GrayScale* image, GrayScale* buffer, PixelList* pixels)
+{
+	BitmapImage bmp;
+	create_bitmap(&bmp, 950, 950);
+
+	for (uint32_t y = 0; y < 950; y++)
+	{
+		uint32_t offsetBMP = y * bmp.bitmap.row_width;
+		uint32_t offset = y * 950;
+		for (uint32_t x = 0; x < 950; x++)
+		{
+			bmp.bitmap.data[offsetBMP + 3 * x + 1] = buffer->data[offset + x];
+			bmp.bitmap.data[offsetBMP + 3 * x + 0] = image->data[offset + x];
+			bmp.bitmap.data[offsetBMP + 3 * x + 2] = 0;
+		}
+
+		for (uint32_t i = 0; i < pixels->count; i++)
+		{
+			int32_t x = pixels->p[i].x;
+			int32_t y = pixels->p[i].y;
+			bmp.bitmap.data[y * bmp.bitmap.row_width + x * 3 + 2] = 255;
+		}
+	}
+
+	char buff[512];
+	sprintf(buff, "res/debug%u.bmp", id);
+
+	FILE* fp = fopen(buff, "wb");
+
+	write_bitmap(fp, &bmp);
+
+	fclose(fp);
 }
 
 void mark_cells(BitmapData* outbmp)
@@ -53,6 +118,7 @@ void mark_cells(BitmapData* outbmp)
     int pc = 1;
 
 	while (whites.count) {
+		// debug_snapshot(pc, image, buffer, &whites);
 		detect_pass(outbmp, image, &whites);
 		erode_pass(buffer, image, &whites);
 
@@ -64,7 +130,7 @@ void mark_cells(BitmapData* outbmp)
 
 		swap(image, buffer);
 
-		remove_black_pixels(image, &whites);
+		remove_black_pixels(image, buffer, &whites);
 
 		printf("%u whites remain\n", whites.count);
 	    pc++;
@@ -91,19 +157,23 @@ void filter(GrayScale* output, GrayScale* input, PixelList* pixels, uint8_t thol
 	}
 }
 
-void remove_black_pixels(GrayScale* image, PixelList* pixels)
+void remove_black_pixels(GrayScale* image, GrayScale* buffer, PixelList* pixels)
 {
 	uint32_t write = 0;
 	for (uint32_t read = 0; read < pixels->count; read++)
 	{
-		int16_t x = pixels->p[read].x;
-		int16_t y = pixels->p[read].y;
-		if (!image->data[y * image->width + x]) continue;
+		int32_t x = pixels->p[read].x;
+		int32_t y = pixels->p[read].y;
+		if (image->data[y * image->width + x] == 0) {
+			buffer->data[y * image->width + x] = 0;
+			continue;
+		}
 
 		pixels->p[write].x = x;
 		pixels->p[write].y = y;
 		write++; 
 	}
+	printf("removed %u pixels\n", pixels->count - write);
 	pixels->count = write;
 }
 
