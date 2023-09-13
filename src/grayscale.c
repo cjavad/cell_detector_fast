@@ -23,6 +23,14 @@ void bmp_to_grayscale(Bitmap *bitmap, GrayScale *image) {
     }
 }
 
+void init_gray(GrayScale* dest, uint32_t width, uint32_t height)
+{
+	dest->width = width;
+	dest->height = height;
+	dest->data = malloc(width * height * sizeof(uint8_t));
+}
+
+
 void write_grayscale(FILE *fp, GrayScale *image) {
     BitmapHeader header;
     BitmapInfoHeader infoHeader;

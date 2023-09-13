@@ -12,7 +12,6 @@ void range_pass(GrayScale* dest, GrayScale* src, uint8_t min, uint8_t max);
 void edge_pass(GrayScale* dest, GrayScale* src);
 void bonc_pass(GrayScale* dest, GrayScale* src, uint32_t thresh, GrayScale* g);
 
-void init_gray(GrayScale* dest, uint32_t widht, uint32_t height);
 
 void erode(GrayScale* dest, GrayScale* src);
 
@@ -80,7 +79,7 @@ int32_t main()
 		{
 			bitmap.data[offsetB + x * bitmap.byte_pp + 0] = outpt[1].data[offsetI + x];//outpt[0].data[offsetI + x];
 			bitmap.data[offsetB + x * bitmap.byte_pp + 1] = outpt[2].data[offsetI + x];
-			bitmap.data[offsetB + x * bitmap.byte_pp + 2] = 0;//outpt[2].data[offsetI + x];
+			bitmap.data[offsetB + x * bitmap.byte_pp + 2] = 0; //outpt[2].data[offsetI + x];
 		}
 	}
 
@@ -195,9 +194,3 @@ void bonc_pass(GrayScale* dest, GrayScale* src, uint32_t thresh, GrayScale* g)
 	}
 }
 
-void init_gray(GrayScale* dest, uint32_t width, uint32_t height)
-{
-	dest->width = width;
-	dest->height = height;
-	dest->data = malloc(width *height * sizeof(uint8_t));
-}
