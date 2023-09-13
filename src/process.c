@@ -30,7 +30,7 @@ void mark_cells(BitmapData* outbmp, GrayScale* input)
 
 	while (whites.count) {
 
-		remove_blacks()
+		// remove_blacks();
 	}
 }
 
