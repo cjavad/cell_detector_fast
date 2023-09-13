@@ -116,4 +116,4 @@ $(OBJDIR)/%.o:
 
 $(BINDIR)/$(RESDIR)/%: $(RESDIR)/%
 	@mkdir -p $(BINDIR)/$(RESDIR)
-	@cp -l -T $^ $@ 
+#	@cp -l -T $^ $@ 
