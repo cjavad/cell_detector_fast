@@ -37,11 +37,15 @@ typedef struct
 } BitmapData;
 
 typedef struct {
-    BitmapHeader* header;
-    BitmapInfoHeader* infoHeader;
-    BitmapData* bitmap;
+    BitmapHeader header;
+    BitmapInfoHeader infoHeader;
+    BitmapData bitmap;
 } BitmapImage;
+
+void init_bitmap(BitmapImage* image);
 
 void read_bitmap(FILE* fp, BitmapImage* image);
 
 void write_bitmap(FILE* fp, BitmapImage* image);
+
+void print_bmpinfo(BitmapImage* image);
