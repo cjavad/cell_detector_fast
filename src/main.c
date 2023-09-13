@@ -47,7 +47,7 @@ int32_t main()
 	range_pass(&outpt[1], &outpt[0], 32, 33);
 	edge_pass(&outpt[2], &outpt[1]);
 
-    // write_grayscale(fp, &output);
+	// write_grayscale(fp, &output);
 
 	uint32_t thresh = 176;
 

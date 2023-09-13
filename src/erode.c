@@ -42,18 +42,42 @@ void erode_pass(GrayScale* output, GrayScale* input)
 
 #define DETECT_SIZE 13
 
+#include <stdio.h>
 uint32_t detect_cell(GrayScale* output, GrayScale* input, GrayScale* final, int32_t cx, int32_t cy)
 {
 	uint32_t exclude = 0;
-	for (int32_t x = cx - DETECT_SIZE / 2; x < cx + DETECT_SIZE / 2 + 1; x++)
+	for (int32_t x = cx - (DETECT_SIZE / 2 + 1); x < cx + (DETECT_SIZE / 2 + 1) + 1; x++)
 	{
-
+		exclude += get_cell(input, x, cy - (DETECT_SIZE / 2 + 1));
+		exclude += get_cell(input, x, cy + (DETECT_SIZE / 2 + 1));
 	}
+	for (int32_t y = cy - (DETECT_SIZE / 2 + 1); y < cy + (DETECT_SIZE / 2 + 1) + 1; y++)
+	{
+		exclude += get_cell(input, cx - (DETECT_SIZE / 2 + 1), y);
+		exclude += get_cell(input, cx + (DETECT_SIZE / 2 + 1), y);
+	}
+	if (exclude) return 0;
+
+	uint32_t found = 0;
 	for (int32_t y = cy - DETECT_SIZE / 2; y < cy + DETECT_SIZE / 2 + 1; y++)
 	{
+		for (int32_t x = cx - DETECT_SIZE / 2; x < cx + DETECT_SIZE / 2 + 1; x++)
+		{
+			found += get_cell(input, x, y);
+		}	
+	}
+	if (!found) return 0;
 
+	printf("found 1\n");
+	for (int32_t y = cy - DETECT_SIZE / 2; y < cy + DETECT_SIZE / 2 + 1; y++)
+	{
+		for (int32_t x = cx - DETECT_SIZE / 2; x < cx + DETECT_SIZE / 2 + 1; x++)
+		{
+			set_cell(output, x, y, 0);
+		}
 	}
 
+	return 1;
 }
 
 uint32_t detect_pass(GrayScale* output, GrayScale* input, GrayScale* final)
