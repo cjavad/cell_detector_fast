@@ -22,12 +22,14 @@ int32_t main()
         FILE* fp = fopen(samples[i]->sample_path, "rb");
         BitmapImage inputImage;
         init_bitmap(&inputImage);
+        read_bitmap(fp, &inputImage);
+        fclose(fp);
 
+        samples[i]->output_bmp = &inputImage;
 
-        grayscale_to_bmp(samples[i]->output_bmp, GrayScale *output);
+        // grayscale_to_bmp(samples[i]->output_bmp, GrayScale *output);
         write_sample(samples[i]);
 
-        fclose(fp);
     }
 
 	return 0;
