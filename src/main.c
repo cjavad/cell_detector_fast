@@ -5,6 +5,7 @@
 
 #include "bitmap.h"
 #include "grayscale.h"
+#include "erode.h"
 
 void blur_pass(GrayScale* dest, GrayScale* src);
 void range_pass(GrayScale* dest, GrayScale* src, uint8_t min, uint8_t max);
@@ -68,7 +69,9 @@ int32_t main()
 
 	// erode(&outpt[2], &outpt[1]);
 	// erode(&outpt[1], &outpt[2]);
-
+	
+	erode_cells(&outpt[2], &outpt[1], &outpt[0]);
+	
 	for (uint32_t y = 0; y < bitmap.height; y++)
 	{
 		uint32_t offsetB = y * bitmap.row_width;
