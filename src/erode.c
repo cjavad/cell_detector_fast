@@ -63,7 +63,7 @@ void erode_pass(GrayScale* output, GrayScale* input)
 	}
 }
 
-#define DETECT_SIZE 13
+#define DETECT_SIZE 7
 
 #define RSIZE 5
 

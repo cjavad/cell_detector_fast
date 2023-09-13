@@ -71,6 +71,9 @@ compile: $(O_FILES) $(D_FILES)
 
 log:
 	@cat build.log
+
+errors:
+	@cat build.log | grep error
 	
 purge: clean
 	@rm -rf $(DEPDIR)
