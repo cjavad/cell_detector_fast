@@ -20,10 +20,12 @@ int32_t main()
         printf("%s\n", samples[i]->sample_path);
 
         FILE* fp = fopen(samples[i]->sample_path, "rb");
+        BitmapImage inputImage;
+        init_bitmap(&inputImage);
 
-        // Do logic here.
 
-        samples[i]->output_bmp;
+        grayscale_to_bmp(samples[i]->output_bmp, GrayScale *output);
+        write_sample(samples[i]);
 
         fclose(fp);
     }
