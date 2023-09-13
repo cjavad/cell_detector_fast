@@ -104,7 +104,7 @@ uint32_t detect_cell(GrayScale* output, GrayScale* input, GrayScale* final, int3
 	{
 		for (int32_t x = cx - RSIZE; x < cx + RSIZE + 1; x++)
 		{
-	//		if ((cy - y) * (cy - y) + (cx - x) * (cx - x) > RSIZE * RSIZE) continue;
+			if ((cy - y) * (cy - y) + (cx - x) * (cx - x) > RSIZE * RSIZE) continue;
 
 			set_cell(final, x, y, 255);
 		}

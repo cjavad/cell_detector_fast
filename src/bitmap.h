@@ -34,8 +34,14 @@ typedef struct
 	uint32_t row_width;
 	uint32_t byte_pp;
 	uint8_t* data;
-} Bitmap;
+} BitmapData;
 
-void read_bitmap(FILE* fp, BitmapHeader* header, BitmapInfoHeader* infoHeader, Bitmap* bitmap);
+typedef struct {
+    BitmapHeader* header;
+    BitmapInfoHeader* infoHeader;
+    BitmapData* bitmap;
+} BitmapImage;
 
-void write_bitmap(FILE* fp, BitmapHeader* header, BitmapInfoHeader* infoHeader, Bitmap* bitmap);
+void read_bitmap(FILE* fp, BitmapImage* image);
+
+void write_bitmap(FILE* fp, BitmapImage* image);

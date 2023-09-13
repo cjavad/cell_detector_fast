@@ -10,7 +10,7 @@ typedef struct {
 } GrayScale;
 
 
-void bmp_to_grayscale(Bitmap* bitmap, GrayScale* image);
+void bmp_to_grayscale(BitmapData* bitmap, GrayScale* image);
 
 void init_gray(GrayScale* dest, uint32_t widht, uint32_t height);
 

@@ -21,9 +21,15 @@ int32_t main()
 
 	BitmapHeader      header;
 	BitmapInfoHeader  infoHeader;
-	Bitmap            bitmap;
+	BitmapData            data;
 
-	read_bitmap(fp, &header, &infoHeader, &bitmap);
+    BitmapImage bitmap;
+
+    bitmap.bitmap = &data;
+    bitmap.header = &header;
+    bitmap.infoHeader = &infoHeader;
+
+	read_bitmap(fp, &bitmap);
 
 	fclose(fp);
 
@@ -34,7 +40,7 @@ int32_t main()
 	fp = fopen("res/out.bmp", "wb");
 
 	GrayScale image;
-	bmp_to_grayscale(&bitmap, &image);
+	bmp_to_grayscale(&data, &image);
 
 	GrayScale output;
 	init_gray(&output, 950, 950);
@@ -71,19 +77,21 @@ int32_t main()
 	
 	erode_cells(&outpt[2], &outpt[1], &outpt[3]);
 	
-	for (uint32_t y = 0; y < bitmap.height; y++)
+	for (uint32_t y = 0; y < data.height; y++)
 	{
-		uint32_t offsetB = y * bitmap.row_width;
-		uint32_t offsetI = y * bitmap.width;
-		for (uint32_t x = 0; x < bitmap.width; x++)
+		uint32_t offsetB = y * data.row_width;
+		uint32_t offsetI = y * data.width;
+		for (uint32_t x = 0; x < data.width; x++)
 		{
-			bitmap.data[offsetB + x * bitmap.byte_pp + 0] = outpt[0].data[offsetI + x];//outpt[0].data[offsetI + x];
-			bitmap.data[offsetB + x * bitmap.byte_pp + 1] = outpt[0].data[offsetI + x];
-			bitmap.data[offsetB + x * bitmap.byte_pp + 2] = outpt[3].data[offsetI + x];
+			data.data[offsetB + x * data.byte_pp + 0] = outpt[0].data[offsetI + x];//outpt[0].data[offsetI + x];
+			data.data[offsetB + x * data.byte_pp + 1] = outpt[0].data[offsetI + x];
+			data.data[offsetB + x * data.byte_pp + 2] = outpt[3].data[offsetI + x];
 		}
 	}
 
-	write_bitmap(fp, &header, &infoHeader, &bitmap);
+
+
+	write_bitmap(fp, &bitmap);
 
     fclose(fp);
 

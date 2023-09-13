@@ -6,7 +6,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-void bmp_to_grayscale(Bitmap *bitmap, GrayScale *image) {
+void bmp_to_grayscale(BitmapData *bitmap, GrayScale *image) {
     image->width = bitmap->width;
     image->height = bitmap->height;
     image->data = malloc(image->width * image->height);
@@ -34,7 +34,12 @@ void init_gray(GrayScale* dest, uint32_t width, uint32_t height)
 void write_grayscale(FILE *fp, GrayScale *image) {
     BitmapHeader header;
     BitmapInfoHeader infoHeader;
-    Bitmap bitmap;
+    BitmapData data;
+    BitmapImage bmpimage;
+
+    bmpimage.bitmap = &data;
+    bmpimage.header = &header;
+    bmpimage.infoHeader = &infoHeader;
 
     uint32_t row_width = (3 * image->width + 3) & ~3;
 
@@ -57,11 +62,11 @@ void write_grayscale(FILE *fp, GrayScale *image) {
     infoHeader.palette_size = 0;
     infoHeader.important_colors = 0;
 
-    bitmap.width = image->width;
-    bitmap.height = image->height;
-    bitmap.byte_pp = 3;
-    bitmap.row_width = row_width;
-    bitmap.data = malloc(bitmap.row_width * bitmap.height);
+    data.width = image->width;
+    data.height = image->height;
+    data.byte_pp = 3;
+    data.row_width = row_width;
+    data.data = malloc(data.row_width * data.height);
 
     // printf("row_width: %u\n", bitmap.row_width);
     // printf("height: %u\n", bitmap.height);
@@ -75,9 +80,9 @@ void write_grayscale(FILE *fp, GrayScale *image) {
             uint8_t g = image->data[y * image->width + x];
             uint8_t r = image->data[y * image->width + x];
 
-            bitmap.data[y * bitmap.row_width + x * bitmap.byte_pp + 0] = r;
-            bitmap.data[y * bitmap.row_width + x * bitmap.byte_pp + 1] = g;
-            bitmap.data[y * bitmap.row_width + x * bitmap.byte_pp + 2] = b;
+            data.data[y * data.row_width + x * data.byte_pp + 0] = r;
+            data.data[y * data.row_width + x * data.byte_pp + 1] = g;
+            data.data[y * data.row_width + x * data.byte_pp + 2] = b;
             
 
             //bitmap.data[y * bitmap.row_width + x * bitmap.byte_pp + 0] = y % 256;
@@ -85,5 +90,5 @@ void write_grayscale(FILE *fp, GrayScale *image) {
         }
     }
 
-    write_bitmap(fp, &header, &infoHeader, &bitmap);
+    write_bitmap(fp, &bmpimage);
 }
