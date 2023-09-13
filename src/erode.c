@@ -4,6 +4,8 @@
 #include <string.h>
 #include "bitmap.h"
 
+#define PASS_DEBUG 0
+
 inline uint32_t get_cell(GrayScale* image, int32_t x, int32_t y)
 {
 	if (x < 0 || (uint32_t)x >= image->width) return 0;
@@ -21,8 +23,16 @@ inline void set_cell(GrayScale* image, int32_t x, int32_t y, uint8_t cell)
 void erode_cells(GrayScale* output, GrayScale* input, GrayScale* final)
 {
 	uint32_t cells = 0;
+	uint32_t i = 0;
 	do 
 	{
+#if PASS_DEBUG == 1
+		char buff[512];
+		sprintf(buff, "res/pass%u.bmp", ++i);
+		FILE* fp = fopen(buff, "wb");
+		write_grayscale(fp, input);
+		fclose(fp);	
+#endif
 		printf("Doing pass\n");
 		erode_pass(output, input);
 		{
@@ -55,6 +65,8 @@ void erode_pass(GrayScale* output, GrayScale* input)
 
 #define DETECT_SIZE 13
 
+#define RSIZE 5
+
 uint32_t detect_cell(GrayScale* output, GrayScale* input, GrayScale* final, int32_t cx, int32_t cy)
 {
 	uint32_t exclude = 0;
@@ -85,6 +97,16 @@ uint32_t detect_cell(GrayScale* output, GrayScale* input, GrayScale* final, int3
 		for (int32_t x = cx - DETECT_SIZE / 2; x < cx + DETECT_SIZE / 2 + 1; x++)
 		{
 			set_cell(output, x, y, 0);
+		}
+	}
+
+	for (int32_t y = cy - RSIZE; y < cy + RSIZE + 1; y++)
+	{
+		for (int32_t x = cx - RSIZE; x < cx + RSIZE + 1; x++)
+		{
+	//		if ((cy - y) * (cy - y) + (cx - x) * (cx - x) > RSIZE * RSIZE) continue;
+
+			set_cell(final, x, y, 255);
 		}
 	}
 

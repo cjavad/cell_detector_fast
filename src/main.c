@@ -17,7 +17,7 @@ void erode(GrayScale* dest, GrayScale* src);
 
 int32_t main()
 {
-	FILE* fp = fopen("res/5IMPOSSIBLE.bmp", "rb");
+	FILE* fp = fopen("res/example.bmp", "rb");
 
 	BitmapHeader      header;
 	BitmapInfoHeader  infoHeader;
@@ -69,7 +69,7 @@ int32_t main()
 	// erode(&outpt[2], &outpt[1]);
 	// erode(&outpt[1], &outpt[2]);
 	
-	erode_cells(&outpt[2], &outpt[1], &outpt[0]);
+	erode_cells(&outpt[2], &outpt[1], &outpt[3]);
 	
 	for (uint32_t y = 0; y < bitmap.height; y++)
 	{
@@ -77,9 +77,9 @@ int32_t main()
 		uint32_t offsetI = y * bitmap.width;
 		for (uint32_t x = 0; x < bitmap.width; x++)
 		{
-			bitmap.data[offsetB + x * bitmap.byte_pp + 0] = outpt[1].data[offsetI + x];//outpt[0].data[offsetI + x];
-			bitmap.data[offsetB + x * bitmap.byte_pp + 1] = outpt[2].data[offsetI + x];
-			bitmap.data[offsetB + x * bitmap.byte_pp + 2] = 0; //outpt[2].data[offsetI + x];
+			bitmap.data[offsetB + x * bitmap.byte_pp + 0] = outpt[0].data[offsetI + x];//outpt[0].data[offsetI + x];
+			bitmap.data[offsetB + x * bitmap.byte_pp + 1] = outpt[0].data[offsetI + x];
+			bitmap.data[offsetB + x * bitmap.byte_pp + 2] = outpt[3].data[offsetI + x];
 		}
 	}
 
