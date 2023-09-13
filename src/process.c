@@ -93,10 +93,10 @@ void remove_black_pixels(GrayScale* image, PixelList* pixels)
 	pixels->count = write;
 }
 
-__attribute__((always_inline)) inline uint32_t get_cell(GrayScale* image, int32_t x, int32_t y)
+__attribute__((always_inline)) inline uint32_t get_cell(GrayScale* image, uint32_t x, uint32_t y)
 {
-	if (x < 0 || (uint32_t)x >= image->width) return 0;
-	if (y < 0 || (uint32_t)y >= image->height) return 0;
+	if (x >= image->width) return 0;
+	if (y >= image->height) return 0;
 	return image->data[y * image->width + x];
 }
 
