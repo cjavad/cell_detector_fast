@@ -5,6 +5,7 @@
 
 #include <string.h>
 
+// remember to allocate data
 void init_bitmap(BitmapImage* image) {
     image = malloc(sizeof(BitmapImage));
 }

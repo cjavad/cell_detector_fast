@@ -1,5 +1,6 @@
 #include "samples.h"
 #include "bitmap.h"
+#include <stdio.h>
 #include <sys/stat.h>
 
 const char* SAMPLE_TYPES[] = {
@@ -98,6 +99,8 @@ void write_sample(sample_t *sample) {
     resolve_output_path(path, sample->sample_type, sample->sample_name);
 
     FILE* fp = fopen(path, "wb");
+
+    printf("%p\n", sample->output_bmp);
 
     write_bitmap(fp, sample->output_bmp);
 

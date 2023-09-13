@@ -31,10 +31,10 @@ void init_gray(GrayScale* dest, uint32_t width, uint32_t height)
 }
 
 void grayscale_to_bmpdata(BitmapData *dest, GrayScale *src) {
-    	
+    printf("Writing grayscale\n");
+
     for (uint32_t y = 0; y < src->height; y++) {
         for (uint32_t x = 0; x < src->width; x++) {
-            
             uint8_t b = src->data[y * src->width + x];
             uint8_t g = src->data[y * src->width + x];
             uint8_t r = src->data[y * src->width + x];
@@ -73,7 +73,6 @@ void grayscale_to_bmp(BitmapImage *bmp, GrayScale *image) {
     bmp->bitmap.byte_pp = 3;
     bmp->bitmap.row_width = row_width;
     bmp->bitmap.data = malloc(bmp->bitmap.row_width * bmp->bitmap.height);
-
     grayscale_to_bmpdata(&bmp->bitmap, image);
 }
 
@@ -81,6 +80,6 @@ void grayscale_to_bmp(BitmapImage *bmp, GrayScale *image) {
 void write_grayscale(FILE *fp, GrayScale *image) {
     BitmapImage bmp;
     init_bitmap(&bmp);
-    grayscale_to_bmpdata(&bmp.bitmap, image);
+    grayscale_to_bmp(&bmp, image);
     write_bitmap(fp, &bmp);
 }
