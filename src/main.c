@@ -11,6 +11,8 @@
 
 #include "process.h"
 
+#include "kernel.h"
+
 int32_t main()
 {
     uint32_t count;
@@ -18,6 +20,7 @@ int32_t main()
 
     get_samples(&samples, &count, EASY);
 
+    print_kernel();
 
     for (int i = 0; i < count; i++) {
         char* name = samples[i]->sample_name;
@@ -31,11 +34,16 @@ int32_t main()
 
         samples[i]->output_bmp = &inputImage;
 
-        mark_cells(&samples[i]->output_bmp->bitmap);
+        // mark_cells(&samples[i]->output_bmp->bitmap);
+        kernel_pass(&samples[i]->output_bmp->bitmap);
 
         // grayscale_to_bmp(samples[i]->output_bmp, GrayScale *output);
         write_sample(samples[i]);
+
+        break;
     }
+
+    
 
 	return 0;
 }
