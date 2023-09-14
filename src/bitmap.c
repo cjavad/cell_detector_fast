@@ -50,8 +50,42 @@ void write_bitmap(FILE *fp, BitmapImage *image) {
     free(file);
 }
 
+void create_bitmap(BitmapImage* bmp, uint32_t width, uint32_t height)
+{
+	uint32_t row_width = (3 * width + 3) & ~3;
+
+    bmp->header.magic[0] = 0x42;
+    bmp->header.magic[1] = 0x4D;
+    bmp->header.size = sizeof(BitmapHeader) + sizeof(BitmapInfoHeader) + row_width * height;
+    bmp->header.r0 = 0;
+    bmp->header.r1 = 0;
+    bmp->header.offset = sizeof(BitmapHeader) + sizeof(BitmapInfoHeader);
+
+    bmp->infoHeader.size = sizeof(BitmapInfoHeader);
+    bmp->infoHeader.width = width;
+    bmp->infoHeader.height = height;
+    bmp->infoHeader.planes = 1;
+    bmp->infoHeader.bpp = 24;
+    bmp->infoHeader.compression = 0;
+    bmp->infoHeader.image_size = row_width * height;
+    bmp->infoHeader.h_resolution = 0;
+    bmp->infoHeader.v_resolution = 0;
+    bmp->infoHeader.palette_size = 0;
+    bmp->infoHeader.important_colors = 0;
+
+    bmp->bitmap.width = width;
+    bmp->bitmap.height = height;
+    bmp->bitmap.byte_pp = 3;
+    bmp->bitmap.row_width = row_width;
+    bmp->bitmap.data = malloc(bmp->bitmap.row_width * bmp->bitmap.height);
+}
+
 void print_bmpinfo(BitmapImage *image) {
     printf("Magic          = %.2s\n", (char *) &image->header.magic);
 	printf("Size           = %ix%i\n", image->infoHeader.width, image->infoHeader.height);
 	printf("Bits per pixel = %u\n", image->infoHeader.bpp);
+}
+
+void destroy_bitmap(BitmapImage* image) {
+	free(image->bitmap.data);
 }

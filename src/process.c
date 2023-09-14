@@ -22,46 +22,7 @@ void remove_black_pixels(GrayScale* image, GrayScale* buffer, PixelList* pixels)
 void erode_pass(GrayScale* output, GrayScale* input, PixelList* pixels);
 void detect_pass(BitmapData* outbmp, GrayScale* image, PixelList* pixels);
 
-uint64_t sum_pixels(GrayScale* image)
-{
-	uint64_t sum = 0;
-	for (uint32_t i = 0; i < image->width * image->height; i++)
-	{
-		sum += image->data[i];
-	}
-	return sum;
-}
-
 #include <stdlib.h>
-void create_bitmap(BitmapImage* bmp, uint32_t width, uint32_t height)
-{
-	uint32_t row_width = (3 * width + 3) & ~3;
-
-    bmp->header.magic[0] = 0x42;
-    bmp->header.magic[1] = 0x4D;
-    bmp->header.size = sizeof(BitmapHeader) + sizeof(BitmapInfoHeader) + row_width * height;
-    bmp->header.r0 = 0;
-    bmp->header.r1 = 0;
-    bmp->header.offset = sizeof(BitmapHeader) + sizeof(BitmapInfoHeader);
-
-    bmp->infoHeader.size = sizeof(BitmapInfoHeader);
-    bmp->infoHeader.width = width;
-    bmp->infoHeader.height = height;
-    bmp->infoHeader.planes = 1;
-    bmp->infoHeader.bpp = 24;
-    bmp->infoHeader.compression = 0;
-    bmp->infoHeader.image_size = row_width * height;
-    bmp->infoHeader.h_resolution = 0;
-    bmp->infoHeader.v_resolution = 0;
-    bmp->infoHeader.palette_size = 0;
-    bmp->infoHeader.important_colors = 0;
-
-    bmp->bitmap.width = width;
-    bmp->bitmap.height = height;
-    bmp->bitmap.byte_pp = 3;
-    bmp->bitmap.row_width = row_width;
-    bmp->bitmap.data = malloc(bmp->bitmap.row_width * bmp->bitmap.height);
-}
 
 void debug_snapshot(uint32_t id, GrayScale* image, GrayScale* buffer, PixelList* pixels)
 {
