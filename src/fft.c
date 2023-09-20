@@ -152,12 +152,12 @@ __attribute__((always_inline)) inline void fft1d(
 
 	for (uint32_t rs = 1; rs < length; rs <<= 1)
 	{
-		printf("rs = %u\n", rs);
+		// printf("rs = %u\n", rs);
 		float rN = -1.0f / rs;
 
 		for (uint32_t o = 0; o < length; o += rs << 1)
 		{
-			if (rs > 32) printf("%u to %u\n", o, o + rs + rs);
+			// if (rs > 32) printf("%u to %u\n", o, o + rs + rs);
 			for (uint32_t k = o; k - o < rs && k + rs < length; k++)
 			{
 				uint32_t px = k;
