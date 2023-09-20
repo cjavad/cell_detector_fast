@@ -3,7 +3,7 @@
 
 #include "float.h"
 
-__attribute__((always_inline)) inline void dft1(
+__attribute__((always_inline)) inline void dft1d(
 	float* const real, 
 	float* const imag,
 	const uint32_t length, 
@@ -103,13 +103,17 @@ inline void fft_unit(float* dest, float* src, uint32_t width, uint32_t height, u
 	
 }
 
-void fft(float* dest, float* src, uint32_t width, uint32_t height)
+void fft(float* real, float* imag, uint32_t width, uint32_t height)
 {
-	for (uint32_t y = 0; y < height; y++)
+	for (uint32_t row = 0; row < height; row++)
 	{
-		for (uint32_t x = 0; x < width; x++)
-		{
+		dft1d(real, imag, width, 1, row * width);
+		// fft1d(real, imag, width, 1, row * width);
+	}
 
-		}
+	for (uint32_t col = 0; col < width; col++)
+	{
+		dft1d(real, imag, height, width, col);
+		// fft1d(real, imag, height, width, col);
 	}
 }
