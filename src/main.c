@@ -14,6 +14,8 @@
 
 #include "kernel.h"
 
+#include "fft.h"
+
 int32_t main()
 {
     uint32_t count;
@@ -36,6 +38,8 @@ int32_t main()
         create_bitmap(samples[i]->output_bmp, inputImage.bitmap.width, inputImage.bitmap.height);
 
         samples[i]->output_bmp = &inputImage;
+
+        fft_test(&samples[i]->output_bmp->bitmap);
 
         // mark_cells(&samples[i]->output_bmp->bitmap);
         kernel_pass(&samples[i]->output_bmp->bitmap);
