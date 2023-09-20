@@ -7,7 +7,7 @@
 
 // remember to allocate data
 void init_bitmap(BitmapImage* image) {
-    image = malloc(sizeof(BitmapImage));
+    // TODO
 }
 
 void read_bitmap(FILE* fp, BitmapImage* image)
