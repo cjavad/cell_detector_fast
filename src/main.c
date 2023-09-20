@@ -28,9 +28,11 @@ int32_t main()
         printf("%s\n", name);
         FILE* fp = fopen(samples[i]->sample_path, "rb");
         BitmapImage inputImage;
-        init_bitmap(&inputImage);
         read_bitmap(fp, &inputImage);
         fclose(fp);
+        
+        // Initially output bmp is a copy of input bmp
+        create_bitmap(samples[i]->output_bmp, inputImage.bitmap.width, inputImage.bitmap.height);
 
         samples[i]->output_bmp = &inputImage;
 

@@ -42,8 +42,6 @@ typedef struct {
     BitmapData bitmap;
 } BitmapImage;
 
-void init_bitmap(BitmapImage* image);
-
 void read_bitmap(FILE* fp, BitmapImage* image);
 
 void write_bitmap(FILE* fp, BitmapImage* image);

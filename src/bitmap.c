@@ -5,11 +5,6 @@
 
 #include <string.h>
 
-// remember to allocate data
-void init_bitmap(BitmapImage* image) {
-    // TODO
-}
-
 void read_bitmap(FILE* fp, BitmapImage* image)
 {
 	// read bitmap
@@ -24,9 +19,9 @@ void read_bitmap(FILE* fp, BitmapImage* image)
     memcpy(&image->infoHeader, file + sizeof(BitmapHeader), sizeof(BitmapInfoHeader));
 
 	image->bitmap.width		= image->infoHeader.width;
-	image->bitmap.height		= image->infoHeader.height;
-	image->bitmap.byte_pp		= image->infoHeader.bpp >> 3;
-	image->bitmap.row_width 	= (image->bitmap.width * image->bitmap.byte_pp + 3) & (~3);
+	image->bitmap.height	= image->infoHeader.height;
+	image->bitmap.byte_pp	= image->infoHeader.bpp >> 3;
+	image->bitmap.row_width = (image->bitmap.width * image->bitmap.byte_pp + 3) & (~3);
 	image->bitmap.data 		= malloc(image->bitmap.row_width * image->bitmap.height);
 
 	// if (bitmap->row_width * bitmap->height != infoHeader->image_size); // oh no

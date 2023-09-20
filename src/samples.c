@@ -86,7 +86,6 @@ void get_samples(sample_t*** samples, uint32_t* count, uint8_t sample_type) {
         (*samples)[i]->sample_path = malloc(strlen(path) + len + 1);
         sprintf((*samples)[i]->sample_path, "%s/%s", path, name);
 
-        init_bitmap((*samples)[i]->output_bmp);
         i++;
     }
 
