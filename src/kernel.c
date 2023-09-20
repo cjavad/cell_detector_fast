@@ -1,4 +1,5 @@
 #include "kernel.h"
+#include "bitmap.h"
 
 #include <stdint.h>
 #include <stdlib.h>
@@ -121,6 +122,20 @@ void run_kernel(Image32f* out, Image32f* in, PixelList* pixels)
 	}
 }
 
+void image32f_to_bitmap(Image32f* image, BitmapData* bmp) {
+    for (uint32_t y = 0; y < image->height; y++)
+	{
+		uint32_t bmp_offset = y * bmp->row_width;
+		uint32_t img_offset = (y + image->offset) * image->stride + image->offset;
+		for (uint32_t x = 0; x < image->width; x++)
+		{
+			bmp->data[bmp_offset + x * 3 + 0] = (uint8_t)(image->data[img_offset + x] * 255.0f);
+			bmp->data[bmp_offset + x * 3 + 1] = (uint8_t)(image->data[img_offset + x] * 255.0f);
+			bmp->data[bmp_offset + x * 3 + 2] = (uint8_t)(image->data[img_offset + x] * 255.0f);
+		}
+	}
+}
+
 void kernel_pass(BitmapData* bmp)
 {
 	Image32f image;
@@ -148,6 +163,8 @@ void kernel_pass(BitmapData* bmp)
 
 	//normalize(&image, &image, &pixels);
 	write_image32f(&image, 2);
+
+    image32f_to_bitmap(&image, bmp);
 }
 
 

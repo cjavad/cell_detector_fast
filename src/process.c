@@ -74,7 +74,12 @@ void mark_cells(BitmapData* outbmp)
 
 	PixelList whites;
 	whites.count = 0;
-	filter(image, image, &whites, 88);
+
+    FILE* pfp = fopen("res/pre-pass0.bmp", "wb");
+    write_grayscale(pfp, image);
+    fclose(pfp);
+
+	filter(image, image, &whites, 225);
 
 #ifdef DEBUG
 	printf("%u whites in total\n", whites.count);

@@ -36,6 +36,7 @@ int32_t main()
 
         // mark_cells(&samples[i]->output_bmp->bitmap);
         kernel_pass(&samples[i]->output_bmp->bitmap);
+        mark_cells(&samples[i]->output_bmp->bitmap);
 
         // grayscale_to_bmp(samples[i]->output_bmp, GrayScale *output);
         write_sample(samples[i]);
