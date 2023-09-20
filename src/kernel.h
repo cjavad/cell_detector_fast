@@ -4,8 +4,8 @@
 
 #include "bitmap.h"
 
-#define KERNEL_SIZE 32
-#define KERNEL_OFFSET 16
+#define KERNEL_SIZE (int32_t) 23
+#define KERNEL_HALF (int32_t) (KERNEL_SIZE / 2)
 
 void kernel_pass(BitmapData* bmp);
 

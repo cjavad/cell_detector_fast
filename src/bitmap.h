@@ -42,8 +42,6 @@ typedef struct {
     BitmapData bitmap;
 } BitmapImage;
 
-void init_bitmap(BitmapImage* image);
-
 void read_bitmap(FILE* fp, BitmapImage* image);
 
 void write_bitmap(FILE* fp, BitmapImage* image);
@@ -51,3 +49,6 @@ void write_bitmap(FILE* fp, BitmapImage* image);
 void create_bitmap(BitmapImage* bmp, uint32_t width, uint32_t height);
 
 void print_bmpinfo(BitmapImage* image);
+
+uint32_t bmp_get_pixel_offset(BitmapData* bmp, uint32_t x, uint32_t y);
+uint8_t bmp_get_pixel(BitmapData* bmp, uint32_t x, uint32_t y, uint8_t channel);

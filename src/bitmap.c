@@ -5,14 +5,9 @@
 
 #include <string.h>
 
-// remember to allocate data
-void init_bitmap(BitmapImage* image) {
-    image = malloc(sizeof(BitmapImage));
-}
-
 void read_bitmap(FILE* fp, BitmapImage* image)
 {
-	// read bitmap
+	// Read bitmap
 	fseek(fp, 0, SEEK_END);
 	uint32_t flen = ftell(fp);
 	fseek(fp, 0, SEEK_SET);
@@ -24,9 +19,9 @@ void read_bitmap(FILE* fp, BitmapImage* image)
     memcpy(&image->infoHeader, file + sizeof(BitmapHeader), sizeof(BitmapInfoHeader));
 
 	image->bitmap.width		= image->infoHeader.width;
-	image->bitmap.height		= image->infoHeader.height;
-	image->bitmap.byte_pp		= image->infoHeader.bpp >> 3;
-	image->bitmap.row_width 	= (image->bitmap.width * image->bitmap.byte_pp + 3) & (~3);
+	image->bitmap.height	= image->infoHeader.height;
+	image->bitmap.byte_pp	= image->infoHeader.bpp >> 3;
+	image->bitmap.row_width = (image->bitmap.width * image->bitmap.byte_pp + 3) & (~3);
 	image->bitmap.data 		= malloc(image->bitmap.row_width * image->bitmap.height);
 
 	// if (bitmap->row_width * bitmap->height != infoHeader->image_size); // oh no
@@ -88,4 +83,12 @@ void print_bmpinfo(BitmapImage *image) {
 
 void destroy_bitmap(BitmapImage* image) {
 	free(image->bitmap.data);
+}
+
+uint32_t bmp_get_pixel_offset(BitmapData *bmp, uint32_t x, uint32_t y) {
+    return y * bmp->row_width + x * bmp->byte_pp;
+}
+
+uint8_t bmp_get_pixel(BitmapData *bmp, uint32_t x, uint32_t y, uint8_t channel) {
+    return bmp->data[bmp_get_pixel_offset(bmp, x, y) + channel];
 }

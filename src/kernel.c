@@ -1,18 +1,16 @@
 #include "kernel.h"
+#include "bitmap.h"
 
 #include <stdint.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
 
-#define KERNEL_SIZE 32
-#define KERNEL_OFFSET 16
-#define KPOS_OFFSET (-KERNEL_OFFSET + 1)
-
 #define ALIGN_8(x) (((x) + 7) & (~7))
 
 #define max(a, b) ((a) > (b) ? (a) : (b))
 #define min(a, b) ((a) < (b) ? (a) : (b))
+#define clamp(x, a, b) (max(min(x, b), a))
 #define swap(a, b) {void* swap_temp = a; a = b; b = swap_temp;}
 
 
@@ -98,7 +96,9 @@ void kernel_instance(Image32f* out, Image32f* in, int32_t cx, int32_t cy)
 {
 	float sum = 0;
 
-	uint32_t img_base = (cy + in->offset + KPOS_OFFSET) * in->stride + in->offset + cx + KPOS_OFFSET;
+    uint32_t base_x = cx + in->offset - KERNEL_HALF;
+    uint32_t base_y = cy + in->offset - KERNEL_HALF;
+	uint32_t img_base = base_y * in->stride + base_x;
 
 	for (int32_t y = 0; y < KERNEL_SIZE; y++)
 	{
@@ -122,12 +122,26 @@ void run_kernel(Image32f* out, Image32f* in, PixelList* pixels)
 	}
 }
 
+void image32f_to_bitmap(Image32f* image, BitmapData* bmp) {
+    for (uint32_t y = 0; y < image->height; y++)
+	{
+		uint32_t bmp_offset = y * bmp->row_width;
+		uint32_t img_offset = (y + image->offset) * image->stride + image->offset;
+		for (uint32_t x = 0; x < image->width; x++)
+		{
+			bmp->data[bmp_offset + x * 3 + 0] = (uint8_t)(image->data[img_offset + x] * 255.0f);
+			bmp->data[bmp_offset + x * 3 + 1] = (uint8_t)(image->data[img_offset + x] * 255.0f);
+			bmp->data[bmp_offset + x * 3 + 2] = (uint8_t)(image->data[img_offset + x] * 255.0f);
+		}
+	}
+}
+
 void kernel_pass(BitmapData* bmp)
 {
 	Image32f image;
 	image.width = bmp->width;
 	image.height = bmp->height;
-	image.offset = ALIGN_8(KERNEL_SIZE - KERNEL_OFFSET);
+	image.offset = ALIGN_8(KERNEL_SIZE - KERNEL_HALF);
 	image.stride = image.width + 2 * image.offset;
 	image.data = calloc(1, (image.width + 2 * image.offset) * (image.height + 2 * image.offset) * sizeof(float));
 
@@ -147,8 +161,10 @@ void kernel_pass(BitmapData* bmp)
 
 	run_kernel(&image, &buffer, &pixels);
 
-	normalize(&image, &image, &pixels);
+	//normalize(&image, &image, &pixels);
 	write_image32f(&image, 2);
+
+    image32f_to_bitmap(&image, bmp);
 }
 
 
@@ -178,20 +194,37 @@ void write_image32f(Image32f* image, uint32_t id)
 	fclose(fp);
 }
 
+float kernel_weight(int32_t x, int32_t y)
+{
+    float dist = sqrt((x * x) + (y * y)); 
+    return dist > KERNEL_HALF ? 0 : dist; 
+}
+
 void print_kernel()
 {
+    float norm = 0;
+
+    for (int32_t y = -KERNEL_HALF; y <= KERNEL_HALF; y++)
+    {
+        for (int32_t x = -KERNEL_HALF; x <= KERNEL_HALF; x++)
+        {
+            norm += kernel_weight(x, y);
+        }
+    }
+
 	FILE* fp = fopen("../../src/kernel.i", "w");
 	fprintf(fp, "float kernel[] = {\n");
-	for (int32_t y = KPOS_OFFSET; y < KPOS_OFFSET + KERNEL_SIZE + 1; y++)
+	for (int32_t y = -KERNEL_HALF; y <= KERNEL_HALF; y++)
 	{
 		fprintf(fp, "\t");
-		for (int32_t x = KPOS_OFFSET; x < KPOS_OFFSET + KERNEL_SIZE + 1; x++)
+		for (int32_t x = -KERNEL_HALF; x <= KERNEL_HALF; x++)
 		{
-			float weight = sqrt((x * x) + (y * y));
-			fprintf(fp, "%ff, ", (14 - weight) / (14));
+			float weight = kernel_weight(x, y) / fabs(norm);
+			fprintf(fp, "%ff, ", weight);
 		}
 		fprintf(fp, "\n");
 	}
+
 	fprintf(fp, "};");
 	fclose(fp);
 }

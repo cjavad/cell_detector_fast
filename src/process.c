@@ -1,8 +1,11 @@
 #include "process.h"
 #include "bitmap.h"
 #include "grayscale.h"
+
 #include <stdint.h>
 #include <stdio.h>
+#include <string.h>
+
 
 #define max(a, b) ((a) > (b) ? (a) : (b))
 #define min(a, b) ((a) < (b) ? (a) : (b))
@@ -67,9 +70,16 @@ void mark_cells(BitmapData* outbmp)
 	bmp_to_grayscale(outbmp, image);
 	init_gray(buffer, b0.width, b0.height);
 
+    memset(buffer->data, 0, buffer->width * buffer->height);
+
 	PixelList whites;
 	whites.count = 0;
-	filter(image, image, &whites, 88);
+
+    FILE* pfp = fopen("res/pre-pass0.bmp", "wb");
+    write_grayscale(pfp, image);
+    fclose(pfp);
+
+	filter(image, image, &whites, 200);
 
 #ifdef DEBUG
 	printf("%u whites in total\n", whites.count);
