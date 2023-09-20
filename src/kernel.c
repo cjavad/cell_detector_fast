@@ -180,7 +180,7 @@ void write_image32f(Image32f* image, uint32_t id)
 float kernel_weight(int32_t x, int32_t y)
 {
     float dist = sqrt((x * x) + (y * y)); 
-    return dist > KERNEL_HALF ? 0 : 1; 
+    return dist > KERNEL_HALF ? 0 : dist; 
 }
 
 void print_kernel()
