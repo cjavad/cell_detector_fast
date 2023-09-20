@@ -98,11 +98,6 @@ __attribute__((always_inline)) inline void fft1d(
 	}
 }
 
-inline void fft_unit(float* dest, float* src, uint32_t width, uint32_t height, uint32_t cx, uint32_t cy)
-{
-	
-}
-
 void fft(float* real, float* imag, uint32_t width, uint32_t height)
 {
 	for (uint32_t row = 0; row < height; row++)
