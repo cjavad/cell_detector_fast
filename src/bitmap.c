@@ -7,7 +7,7 @@
 
 void read_bitmap(FILE* fp, BitmapImage* image)
 {
-	// read bitmap
+	// Read bitmap
 	fseek(fp, 0, SEEK_END);
 	uint32_t flen = ftell(fp);
 	fseek(fp, 0, SEEK_SET);

@@ -83,8 +83,10 @@ void get_samples(sample_t*** samples, uint32_t* count, uint8_t sample_type) {
         memcpy((*samples)[i]->sample_name, name, len - 4);
         (*samples)[i]->sample_name[len - 4] = '\0';
 
-        (*samples)[i]->sample_path = malloc(strlen(path) + len + 1);
+        (*samples)[i]->sample_path = malloc(strlen(path) + len + 2);
         sprintf((*samples)[i]->sample_path, "%s/%s", path, name);
+
+        (*samples)[i]->output_bmp = malloc(sizeof(BitmapImage));
 
         i++;
     }
