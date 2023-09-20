@@ -79,7 +79,7 @@ void mark_cells(BitmapData* outbmp)
     write_grayscale(pfp, image);
     fclose(pfp);
 
-	filter(image, image, &whites, 225);
+	filter(image, image, &whites, 200);
 
 #ifdef DEBUG
 	printf("%u whites in total\n", whites.count);

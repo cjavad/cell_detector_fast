@@ -84,3 +84,11 @@ void print_bmpinfo(BitmapImage *image) {
 void destroy_bitmap(BitmapImage* image) {
 	free(image->bitmap.data);
 }
+
+uint32_t bmp_get_pixel_offset(BitmapData *bmp, uint32_t x, uint32_t y) {
+    return y * bmp->row_width + x * bmp->byte_pp;
+}
+
+uint8_t bmp_get_pixel(BitmapData *bmp, uint32_t x, uint32_t y, uint8_t channel) {
+    return bmp->data[bmp_get_pixel_offset(bmp, x, y) + channel];
+}
