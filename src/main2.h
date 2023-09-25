@@ -5,7 +5,6 @@
 
 #include "bitmap.h"
 #include "grayscale.h"
-#include "erode.h"
 #include "process.h"
 
 void blur_pass(GrayScale* dest, GrayScale* src);

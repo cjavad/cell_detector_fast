@@ -6,7 +6,6 @@
 
 #include "bitmap.h"
 #include "grayscale.h"
-#include "erode.h"
 #include "peak.h"
 #include "samples.h"
 
@@ -16,12 +15,11 @@
 
 #include "fft.h"
 
-int32_t main()
-{
+void process_samples(const int sample_type) {
     uint32_t count;
     sample_t** samples;
 
-    get_samples(&samples, &count, MEDIUM);
+    get_samples(&samples, &count, sample_type);
 
     print_kernel();
 
@@ -55,11 +53,14 @@ int32_t main()
 
         // grayscale_to_bmp(samples[i]->output_bmp, GrayScale *output);
         write_sample(samples[i]);
-
-        break;
     }
+}
 
-    
-
+int32_t main()
+{
+    process_samples(EASY);
+    process_samples(MEDIUM);
+    process_samples(HARD);
+    process_samples(IMPOSSIBLE);
 	return 0;
 }
