@@ -107,7 +107,6 @@ void kernel_pass(BitmapData* bmp, Kernel* kernel)
 	run_kernel(&image, &buffer, kernel);
     free(buffer.data);    
 
-	write_image32f(&image, 2);
     image32f_to_bitmap(&image, bmp);
     
     free(image.data);
