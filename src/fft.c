@@ -93,6 +93,11 @@ void fft_test(BitmapData* data)
 	write_bitmap(fp, &bmp);
 	fclose(fp);
     free_bitmap(&bmp);
+
+    free(imager);
+    free(imagei);
+    free(outr);
+    free(outi);
 }
 
 __attribute__((always_inline)) inline void dft1d(

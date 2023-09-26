@@ -1,6 +1,7 @@
 #include "samples.h"
 #include "bitmap.h"
 #include <stdio.h>
+#include <stdlib.h>
 #include <sys/stat.h>
 
 const char* SAMPLE_TYPES[] = {
@@ -92,6 +93,7 @@ void get_samples(sample_t*** samples, uint32_t* count, uint8_t sample_type) {
     }
 
     closedir(d);
+    free(path);
 }
 
 void write_sample(sample_t *sample) {
@@ -106,6 +108,7 @@ void write_sample(sample_t *sample) {
     write_bitmap(fp, sample->output_bmp);
 
     fclose(fp);
+    free(path);
 }
 
 void write_samples(sample_t **samples, uint32_t count) {

@@ -22,7 +22,7 @@ void process_samples(const int sample_type) {
 
     get_samples(&samples, &count, sample_type);
 
-        print_kernel();
+    print_kernel();
 
     for (int i = 0; i < count; i++) {
         char* name = samples[i]->sample_name;
@@ -63,6 +63,8 @@ void process_samples(const int sample_type) {
         write_sample(samples[i]);
         free_sample(samples[i]);
     }
+
+    free(samples);
 }
 
 int32_t main()

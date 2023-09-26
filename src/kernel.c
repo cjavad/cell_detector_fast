@@ -143,6 +143,7 @@ void image32f_to_bitmap(Image32f* image, BitmapData* bmp) {
 void kernel_pass(BitmapData* bmp)
 {
 	Image32f image;
+
 	image.width = bmp->width;
 	image.height = bmp->height;
 	image.offset = ALIGN_8(KERNEL_SIZE - KERNEL_HALF);
@@ -150,6 +151,7 @@ void kernel_pass(BitmapData* bmp)
 	image.data = calloc(1, (image.width + 2 * image.offset) * (image.height + 2 * image.offset) * sizeof(float));
 
 	Image32f buffer;
+
 	buffer.width = image.width;
 	buffer.height = image.height;
 	buffer.offset = image.offset;
@@ -169,6 +171,9 @@ void kernel_pass(BitmapData* bmp)
 	write_image32f(&image, 2);
 
     image32f_to_bitmap(&image, bmp);
+
+    free(image.data);
+    free(buffer.data);
 }
 
 
