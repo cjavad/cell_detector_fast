@@ -229,9 +229,11 @@ impl Viewer {
 
                         if let Some(pointer) = event.get::<PointerEvent>() {
                             if pointer.scroll.y > 0.0 {
+                                event.handle();
                                 gaussian.size += 2;
                                 cx.request_rebuild();
                             } else if pointer.scroll.y < 0.0 && gaussian.size > 3 {
+                                event.handle();
                                 gaussian.size -= 2;
                                 cx.request_rebuild();
                             }
@@ -263,6 +265,7 @@ impl Viewer {
 
                         if let Some(pointer) = event.get::<PointerEvent>() {
                             if pointer.scroll.y != 0.0 {
+                                event.handle();
                                 gaussian.sigma += pointer.scroll.y * 0.05;
                                 cx.request_rebuild();
                             }
@@ -290,9 +293,11 @@ impl Viewer {
 
                         if let Some(pointer) = event.get::<PointerEvent>() {
                             if pointer.scroll.y > 0.0 {
+                                event.handle();
                                 laplacian.size += 2;
                                 cx.request_rebuild();
                             } else if pointer.scroll.y < 0.0 && laplacian.size > 3 {
+                                event.handle();
                                 laplacian.size -= 2;
                                 cx.request_rebuild();
                             }
@@ -402,7 +407,7 @@ impl Viewer {
         .align_items(Align::Stretch)
         .gap(rem(0.2));
 
-        let right_pad = pad(rem(0.5), right_panel);
+        let right_pad = vscroll(pad(rem(0.5), right_panel));
 
         size(
             FILL,
