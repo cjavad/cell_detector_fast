@@ -35,6 +35,7 @@ pub struct Pass {
     pub kind: PassKind,
     pub output: Image,
     pub enabled: bool,
+    pub kernel: Image,
 }
 
 impl Pass {
@@ -43,6 +44,7 @@ impl Pass {
             kind: PassKind::Gaussian(Gaussian::default()),
             output: Image::default(),
             enabled: true,
+            kernel: Image::default(),
         }
     }
 
@@ -51,6 +53,7 @@ impl Pass {
             kind: PassKind::Laplacian(Laplacian::default()),
             output: Image::default(),
             enabled: true,
+            kernel: Image::default(),
         }
     }
 }
@@ -144,6 +147,10 @@ impl Viewer {
                     let path = format!("{}/kernel_pass_{}.bmp", Self::PASS_DIR, i);
                     let data = fs::read(path).unwrap();
                     pass.output = Image::load_data(data);
+
+                    let path = format!("{}/kernel_{}.bmp", Self::PASS_DIR, i);
+                    let data = fs::read(path).unwrap();
+                    pass.kernel = Image::load_data(data);
                 }
 
                 let input_path = Path::new("samples/easy/1EASY.bmp");
@@ -205,7 +212,7 @@ impl Viewer {
             },
         );
 
-        let pass = match pass.kind {
+        let data = match pass.kind {
             PassKind::Gaussian(ref gaussian) => {
                 let size = on_event_after(
                     text(format!("Size: {}", gaussian.size)),
@@ -224,6 +231,16 @@ impl Viewer {
                                 gaussian.size += 2;
                                 cx.request_rebuild();
                             } else if pointer.scroll.y < 0.0 && gaussian.size > 3 {
+                                gaussian.size -= 2;
+                                cx.request_rebuild();
+                            }
+                        }
+
+                        if let Some(keyboard) = event.get::<KeyboardEvent>() {
+                            if keyboard.is_pressed(Code::Up) {
+                                gaussian.size += 2;
+                                cx.request_rebuild();
+                            } else if keyboard.is_pressed(Code::Down) && gaussian.size > 3 {
                                 gaussian.size -= 2;
                                 cx.request_rebuild();
                             }
@@ -254,9 +271,8 @@ impl Viewer {
 
                 let data = flex(1.0, width(FILL, vstack![text("Gaussian"), size, sigma]));
 
-                let control = vstack![enabled, remove].gap(rem(0.5));
 
-                any(hstack![control, data].gap(rem(0.5)))
+                any(data)
             }
             PassKind::Laplacian(ref laplacian) => {
                 let size = on_event_after(
@@ -280,16 +296,28 @@ impl Viewer {
                                 cx.request_rebuild();
                             }
                         }
+
+                        if let Some(keyboard) = event.get::<KeyboardEvent>() {
+                            if keyboard.is_pressed(Code::Up) {
+                                laplacian.size += 2;
+                                cx.request_rebuild();
+                            } else if keyboard.is_pressed(Code::Down) && laplacian.size > 3 {
+                                laplacian.size -= 2;
+                                cx.request_rebuild();
+                            }
+                        }
                     },
                 );
 
                 let data = flex(1.0, width(FILL, vstack![text("Laplacian"), size]));
 
-                let control = vstack![enabled, remove].gap(rem(0.5));
-
-                any(hstack![control, data].gap(rem(0.5)))
+                any(data)
             }
         };
+
+        let control = vstack![enabled, remove].gap(rem(0.5));
+        let thumbnail =  size(rem(5.0), pass.kernel.clone());
+        let pass = hstack![control, data, thumbnail].gap(rem(0.5));
 
         let color = if self.selected == Selection::Pass(index) {
             style(Palette::ACCENT)
@@ -313,7 +341,7 @@ impl Viewer {
                 info!("Selected pass {}", i);
             });
 
-            views.push(width(rem(10.0), pass));
+            views.push(width(rem(18.5), pass));
         }
 
         vstack![for views].gap(rem(0.2))
@@ -363,7 +391,7 @@ impl Viewer {
 
         size(
             FILL,
-            hstack![flex(1.0, size(FILL, self.output())), top(right_pad)],
+            hstack![flex(1.0, center(size(vh(1.0), self.output()))), top(right_pad)].justify_content(Justify::SpaceBetween),
         )
     }
 }
