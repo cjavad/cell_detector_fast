@@ -1,4 +1,4 @@
-use std::process::Command;
+use std::{fs, path::Path, process::Command};
 
 use ori::prelude::*;
 
@@ -55,20 +55,30 @@ impl Pass {
     }
 }
 
-#[derive(Default)]
-pub struct Viewer {
-    pub passes: Vec<Pass>,
-    pub selected: Option<usize>,
+#[derive(Clone, Copy, PartialEq)]
+pub enum Selection {
+    Input,
+    Pass(usize),
+    Output,
+}
+
+struct Viewer {
+    passes: Vec<Pass>,
+    selected: Selection,
+    input: Image,
+    output: Image,
 }
 
 impl Viewer {
     const DIST_DIR: &'static str = "dist";
     const PASS_DIR: &'static str = "dist/passes";
 
-    pub fn new() -> Self {
+    fn new() -> Self {
         Self {
             passes: vec![Pass::gaussian(), Pass::laplacian()],
-            selected: None,
+            selected: Selection::Output,
+            input: Image::default(),
+            output: Image::default(),
         }
     }
 
@@ -124,7 +134,7 @@ impl Viewer {
 
         match command.output() {
             Ok(output) => {
-                info!("Ran cells: {}", String::from_utf8_lossy(&output.stdout));
+                info!("Output: {}", String::from_utf8_lossy(&output.stdout));
 
                 for (i, pass) in self.passes.iter_mut().enumerate() {
                     if !pass.enabled {
@@ -132,9 +142,15 @@ impl Viewer {
                     }
 
                     let path = format!("{}/kernel_pass_{}.bmp", Self::PASS_DIR, i);
-                    let data = std::fs::read(path).unwrap();
+                    let data = fs::read(path).unwrap();
                     pass.output = Image::load_data(data);
                 }
+
+                let input_path = Path::new("samples/easy/1EASY.bmp");
+                let output_path = Path::new(Self::DIST_DIR).join("output.bmp");
+
+                self.input = Image::load_data(fs::read(input_path).unwrap());
+                self.output = Image::load_data(fs::read(output_path).unwrap());
             }
             Err(err) => {
                 error!("Failed to run cells: {}", err);
@@ -185,7 +201,7 @@ impl Viewer {
                 .color(hsl(0.0, 0.5, 0.5)),
             move |_, data: &mut Self| {
                 data.passes.remove(index);
-                data.selected = None;
+                data.selected = Selection::Output;
             },
         );
 
@@ -275,7 +291,7 @@ impl Viewer {
             }
         };
 
-        let color = if self.selected == Some(index) {
+        let color = if self.selected == Selection::Pass(index) {
             style(Palette::ACCENT)
         } else {
             style(Palette::BACKGROUND)
@@ -293,7 +309,7 @@ impl Viewer {
 
         for i in 0..self.passes.len() {
             let pass = on_click(self.pass(i), move |_, data: &mut Self| {
-                data.selected = Some(i);
+                data.selected = Selection::Pass(i);
                 info!("Selected pass {}", i);
             });
 
@@ -303,16 +319,39 @@ impl Viewer {
         vstack![for views].gap(rem(0.2))
     }
 
+    fn select_input_button(&mut self) -> impl View<Self> {
+        let select = button(text("Select Input")).padding(rem(0.3));
+
+        on_press(select, |_, data: &mut Self| {
+            data.selected = Selection::Input;
+        })
+    }
+
+    fn select_output_button(&mut self) -> impl View<Self> {
+        if !Path::new(Self::DIST_DIR).join("output.bmp").exists() {
+            return None;
+        }
+
+        let select = button(text("Select Output")).padding(rem(0.3));
+
+        Some(on_press(select, |_, data: &mut Self| {
+            data.selected = Selection::Output;
+        }))
+    }
+
     fn output(&mut self) -> impl View<Self> {
         match self.selected {
-            Some(index) => self.passes[index].output.clone(),
-            None => Image::default(),
+            Selection::Input => self.input.clone(),
+            Selection::Pass(i) => self.passes[i].output.clone(),
+            Selection::Output => self.output.clone(),
         }
     }
 
     pub fn ui(&mut self) -> impl View<Self> {
         let right_panel = vstack![
+            self.select_input_button(),
             self.pass_list(),
+            self.select_output_button(),
             self.add_gaussian_button(),
             self.add_laplacian_button(),
             self.run_button(),

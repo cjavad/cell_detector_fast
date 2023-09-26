@@ -273,7 +273,6 @@ int32_t main(int argc, char** argv)
     } else if (input != NULL && output != NULL) {
         // Apply on single image
         process_single();
-
     } else {
         // Process samples
         process_samples();
