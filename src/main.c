@@ -61,6 +61,7 @@ void process_bitmap(BitmapImage *image) {
         draw_cross(&image->bitmap, x, y, 255, 0, 0);
     }
 
+    free_bitmap(&bmp);
     vec_free(&peaks);
 }
 
