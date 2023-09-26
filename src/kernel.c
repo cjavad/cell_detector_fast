@@ -163,6 +163,16 @@ void write_kernel(FILE* fp, Kernel* kernel) {
     free_bitmap(&bmp);
 }
 
+void print_kernel(Kernel *kernel) {
+    // Print in text as matrix
+    for (int32_t y = 0; y < kernel->size; y++) {
+        for (int32_t x = 0; x < kernel->size; x++) {
+            printf("%f ", kernel->data[y * kernel->size + x]);
+        }
+        printf("\n");
+    }
+}
+
 #define KERNEL_INIT(kernel, size) \
     kernel->size = size; \
     kernel->data = malloc(size * size * sizeof(float)); \
@@ -213,12 +223,14 @@ void init_laplacian_kernel(Kernel *kernel, int32_t size) {
             if (dx == 0 && dy == 0) {
                 kernel->data[y * size + x] = -(size - 1) * (size - 1);
             } else {
-                kernel->data[y * size + x] = fabs(half - (dx + dy));
+                kernel->data[y * size + x] = half - (fabs(dx) + fabs(dy) - 1); 
+                if (kernel->data[y * size + x] < 0) kernel->data[y * size + x] = 0;
             }
-
             KERNEL_NORM_INC(kernel, size, x, y)
         }
     }
+
+    print_kernel(kernel);
 
     KERNEL_NORM_END(kernel, size)
 }

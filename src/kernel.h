@@ -10,7 +10,7 @@ typedef struct {
 } Kernel;
 
 void write_kernel(FILE* fp, Kernel* kernel);
-
+void print_kernel(Kernel* kernel);
 
 void free_kernel(Kernel* kernel);
 

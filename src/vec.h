@@ -35,4 +35,4 @@
 
 #define vec_pop(vec) (vec)->data[--(vec)->len]
 
-#define vec_free(vec) free((vec)->data)
+#define vec_free(vec) if ((vec)->len > 0) free((vec)->data)
