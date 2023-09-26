@@ -31,3 +31,5 @@ void get_samples(sample_t*** samples, uint32_t* count, uint8_t sample_type);
 
 void write_sample(sample_t* sample);
 void write_samples(sample_t** samples, uint32_t count);
+
+void free_sample(sample_t* sample);

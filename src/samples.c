@@ -113,3 +113,10 @@ void write_samples(sample_t **samples, uint32_t count) {
         write_sample(samples[i]);
     }
 }
+
+void free_sample(sample_t *sample) {
+    free(sample->sample_name);
+    free(sample->sample_path);
+    free_bitmap(sample->output_bmp);
+    free(sample);
+}

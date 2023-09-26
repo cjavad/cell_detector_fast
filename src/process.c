@@ -59,6 +59,8 @@ void debug_snapshot(uint32_t id, GrayScale* image, GrayScale* buffer, PixelList*
 	write_bitmap(fp, &bmp);
 
 	fclose(fp);
+
+    free_bitmap(&bmp);
 }
 
 void mark_cells(BitmapData* outbmp)
@@ -265,5 +267,7 @@ void detect_cell(BitmapData* bmp, GrayScale* image, int32_t cx, int32_t cy)
                 bmp_set_pixels(bmp, x, y, 255, 0, 0);
             }
         }
+
+        draw_cross(bmp, cx, cy, 255, 0, 0);
     }
 }

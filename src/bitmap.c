@@ -75,11 +75,16 @@ void create_bitmap(BitmapImage* bmp, uint32_t width, uint32_t height)
     bmp->bitmap.data = malloc(bmp->bitmap.row_width * bmp->bitmap.height);
 }
 
+void free_bitmap(BitmapImage *image) {
+    free(image->bitmap.data);
+}
+
 void print_bmpinfo(BitmapImage *image) {
     printf("Magic          = %.2s\n", (char *) &image->header.magic);
 	printf("Size           = %ix%i\n", image->infoHeader.width, image->infoHeader.height);
 	printf("Bits per pixel = %u\n", image->infoHeader.bpp);
 }
+
 
 void destroy_bitmap(BitmapImage* image) {
 	free(image->bitmap.data);
@@ -109,14 +114,15 @@ __attribute__((always_inline)) inline void bmp_set_pixels(BitmapData *bmp, uint3
     bmp_set_offset_secure(bmp, bmp_get_pixel_offset(bmp, x, y), r, g, b);
 }
 
+#define CROSS_SIZE 5
 
-void draw_cross(BitmapImage *image, uint32_t x, uint32_t y, uint8_t r, uint8_t g, uint8_t b) {
-    for (uint32_t i = 0; i < 5; i++) {
-        bmp_set_pixels(&image->bitmap, x + i, y, r, g, b);
-        bmp_set_pixels(&image->bitmap, x - i, y, r, g, b);
-        bmp_set_pixels(&image->bitmap, x, y + i, r, g, b);
-        bmp_set_pixels(&image->bitmap, x, y - i, r, g, b);
+void draw_cross(BitmapData *bmp, uint32_t x, uint32_t y, uint8_t r, uint8_t g, uint8_t b) {
+    for (uint32_t i = 0; i < CROSS_SIZE; i++) {
+        bmp_set_pixels(bmp, x + i, y, r, g, b);
+        bmp_set_pixels(bmp, x - i, y, r, g, b);
+        bmp_set_pixels(bmp, x, y + i, r, g, b);
+        bmp_set_pixels(bmp, x, y - i, r, g, b);
     }
 
-    bmp_set_pixels(&image->bitmap, x, y, 255, 0, 0);
+    bmp_set_pixels(bmp, x, y, 255, 0, 0);
 }

@@ -22,7 +22,7 @@ void process_samples(const int sample_type) {
 
     get_samples(&samples, &count, sample_type);
 
-    print_kernel();
+        print_kernel();
 
     for (int i = 0; i < count; i++) {
         char* name = samples[i]->sample_name;
@@ -34,7 +34,7 @@ void process_samples(const int sample_type) {
         fclose(fp);
         
         // Initially output bmp is a copy of input bmp
-        create_bitmap(samples[i]->output_bmp, inputImage.bitmap.width, inputImage.bitmap.height);
+        // create_bitmap(samples[i]->output_bmp, inputImage.bitmap.width, inputImage.bitmap.height);
 
         samples[i]->output_bmp = &inputImage;
 
@@ -55,12 +55,13 @@ void process_samples(const int sample_type) {
 
 
             // Draw cross here with center at x, y
-            draw_cross(&inputImage, x, y, 255, 0, 0);
+            draw_cross(&inputImage.bitmap, x, y, 255, 0, 0);
     
         }
 
         // grayscale_to_bmp(samples[i]->output_bmp, GrayScale *output);
         write_sample(samples[i]);
+        free_sample(samples[i]);
     }
 }
 

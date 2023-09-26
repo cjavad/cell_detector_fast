@@ -200,6 +200,7 @@ void write_image32f(Image32f* image, uint32_t id)
 	write_bitmap(fp, &bmp);
 
 	fclose(fp);
+    free_bitmap(&bmp);
 }
 
 float kernel_weight(int32_t x, int32_t y)

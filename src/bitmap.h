@@ -49,9 +49,10 @@ void write_bitmap(FILE* fp, BitmapImage* image);
 void create_bitmap(BitmapImage* bmp, uint32_t width, uint32_t height);
 
 void print_bmpinfo(BitmapImage* image);
+void free_bitmap(BitmapImage* image);
 
 
-void draw_cross(BitmapImage* image, uint32_t x, uint32_t y, uint8_t r, uint8_t g, uint8_t b);
+void draw_cross(BitmapData* bmp, uint32_t x, uint32_t y, uint8_t r, uint8_t g, uint8_t b);
 
 
 uint32_t bmp_get_pixel_offset(BitmapData* bmp, uint32_t x, uint32_t y);

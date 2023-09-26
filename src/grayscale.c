@@ -52,4 +52,5 @@ void write_grayscale(FILE *fp, GrayScale *image) {
     create_bitmap(&bmp, image->width, image->height);
     grayscale_to_bmp(&bmp, image);
     write_bitmap(fp, &bmp);
+    free_bitmap(&bmp);
 }

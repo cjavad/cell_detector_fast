@@ -45,6 +45,7 @@ void krad_debug_snapshot(uint32_t id, GrayScale* image, GrayScale* buffer, Pixel
 		}
 	}
 
+
 	char buff[512];
 	sprintf(buff, "res/krad%u.bmp", id);
 
@@ -53,6 +54,7 @@ void krad_debug_snapshot(uint32_t id, GrayScale* image, GrayScale* buffer, Pixel
 	write_bitmap(fp, &bmp);
 
 	fclose(fp);
+    free_bitmap(&bmp);
 }
 
 void krad_pass(BitmapData* outbmp)

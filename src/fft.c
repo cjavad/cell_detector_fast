@@ -1,6 +1,7 @@
 #include "fft.h"
 #include <stdint.h>
 
+#include "bitmap.h"
 #include "float.h"
 
 #include <stdlib.h>
@@ -91,6 +92,7 @@ void fft_test(BitmapData* data)
 	fp = fopen("res/fft_test.bmp", "wb");
 	write_bitmap(fp, &bmp);
 	fclose(fp);
+    free_bitmap(&bmp);
 }
 
 __attribute__((always_inline)) inline void dft1d(
