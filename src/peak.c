@@ -3,6 +3,7 @@
 #include <stdint.h>
 
 #include "bitmap.h"
+#include "vec.h"
 
 uint32_t find_highest_neighbor(BitmapData* bmp, uint32_t x, uint32_t y) 
 {
@@ -78,10 +79,7 @@ void remove_peak(BitmapData* bmp, uint32_t x, uint32_t y)
     }
 }
 
-PeakVec find_peaks(BitmapData* bmp) {
-    PeakVec peaks;
-    vec_init(&peaks);
-
+void find_peaks(PeakVec* peaks, BitmapData* bmp) {
     for (uint32_t y = 0; y < bmp->height; y++) 
     {
         for (uint32_t x = 0; x < bmp->width; x++)
@@ -93,9 +91,7 @@ PeakVec find_peaks(BitmapData* bmp) {
             uint32_t py = peak / bmp->row_width;
             remove_peak(bmp, px, py);
 
-            vec_push(&peaks, peak);
+            vec_push(peaks, peak);
         }
     }
-
-    return peaks;
 }

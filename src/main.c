@@ -15,6 +15,7 @@
 #include "kernel.h"
 
 #include "fft.h"
+#include "vec.h"
 
 void process_samples(const int sample_type) {
     uint32_t count;
@@ -38,11 +39,15 @@ void process_samples(const int sample_type) {
 
         samples[i]->output_bmp = &inputImage;
 
-        fft_test(&inputImage.bitmap);
-
         // mark_cells(&&inputImage.bitmap);
         kernel_pass(&inputImage.bitmap);
-        PeakVec peaks = find_peaks(&inputImage.bitmap);
+        
+        PeakVec peaks;
+
+        vec_init(&peaks);
+        
+        find_peaks(&peaks, &inputImage.bitmap);
+        
         printf("peaks: %u\n", peaks.len);
 
         for (uint32_t j = 0; j < peaks.len; j++) {
@@ -58,10 +63,14 @@ void process_samples(const int sample_type) {
             draw_cross(&inputImage.bitmap, x, y, 255, 0, 0);
     
         }
+        
+        vec_free(&peaks);
 
         // grayscale_to_bmp(samples[i]->output_bmp, GrayScale *output);
         write_sample(samples[i]);
         free_sample(samples[i]);
+
+        break;
     }
 
     free(samples);
@@ -70,8 +79,8 @@ void process_samples(const int sample_type) {
 int32_t main()
 {
     process_samples(EASY);
-    process_samples(MEDIUM);
-    process_samples(HARD);
-    process_samples(IMPOSSIBLE);
+    //process_samples(MEDIUM);
+    //process_samples(HARD);
+    //process_samples(IMPOSSIBLE);
 	return 0;
 }

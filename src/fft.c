@@ -11,6 +11,7 @@
 
 void fft_test(BitmapData* data)
 {
+#ifdef DEBUG
 	BitmapImage bmp;
 	create_bitmap(&bmp, data->width, data->height);
 
@@ -60,9 +61,9 @@ void fft_test(BitmapData* data)
 		}
 	}
 
-	fp = fopen("res/dft_test.bmp", "wb");
-	write_bitmap(fp, &bmp);
-	fclose(fp);
+    fp = fopen("res/dft_test.bmp", "wb");
+    write_bitmap(fp, &bmp);
+    fclose(fp);
 
 	memcpy(outr, imager, bmp.bitmap.width * bmp.bitmap.height * sizeof(float));
 	memcpy(outi, imagei, bmp.bitmap.width * bmp.bitmap.height * sizeof(float));
@@ -92,12 +93,13 @@ void fft_test(BitmapData* data)
 	fp = fopen("res/fft_test.bmp", "wb");
 	write_bitmap(fp, &bmp);
 	fclose(fp);
-    free_bitmap(&bmp);
 
+    free_bitmap(&bmp);
     free(imager);
     free(imagei);
     free(outr);
     free(outi);
+#endif
 }
 
 __attribute__((always_inline)) inline void dft1d(

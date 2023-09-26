@@ -87,7 +87,7 @@ void get_samples(sample_t*** samples, uint32_t* count, uint8_t sample_type) {
         (*samples)[i]->sample_path = malloc(strlen(path) + len + 2);
         sprintf((*samples)[i]->sample_path, "%s/%s", path, name);
 
-        (*samples)[i]->output_bmp = malloc(sizeof(BitmapImage));
+        // (*samples)[i]->output_bmp = malloc(sizeof(BitmapImage));
 
         i++;
     }
@@ -102,9 +102,7 @@ void write_sample(sample_t *sample) {
     resolve_output_path(path, sample->sample_type, sample->sample_name);
 
     FILE* fp = fopen(path, "wb");
-
-    printf("%p\n", sample->output_bmp);
-
+    
     write_bitmap(fp, sample->output_bmp);
 
     fclose(fp);

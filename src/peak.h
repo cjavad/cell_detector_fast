@@ -7,4 +7,4 @@
 
 typedef Vec(uint32_t) PeakVec;
 
-PeakVec find_peaks(BitmapData* bmp);
+void find_peaks(PeakVec* peaks, BitmapData* bmp);

@@ -166,14 +166,13 @@ void kernel_pass(BitmapData* bmp)
 	write_image32f(&buffer, 0);
 
 	run_kernel(&image, &buffer, &pixels);
+    free(buffer.data);    
 
 	//normalize(&image, &image, &pixels);
 	write_image32f(&image, 2);
-
     image32f_to_bitmap(&image, bmp);
-
+    
     free(image.data);
-    free(buffer.data);
 }
 
 
@@ -203,9 +202,8 @@ void write_image32f(Image32f* image, uint32_t id)
 	}
 
 	write_bitmap(fp, &bmp);
-
-	fclose(fp);
     free_bitmap(&bmp);
+	fclose(fp);
 }
 
 float kernel_weight(int32_t x, int32_t y)
