@@ -61,6 +61,8 @@ release: PPFLAGS += -DRELEASE
 release: clear_build_log clean compile
 
 res: $(BINDIR)/$(OR_FILES)
+	@echo "!========< RESOURCES >========!"
+	@mkdir -p $(BINDIR)/$(RESDIR)
 
 compile: $(O_FILES) $(D_FILES)
 	@echo "!========< LINK >========!"

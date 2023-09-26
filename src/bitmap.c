@@ -79,6 +79,12 @@ void free_bitmap(BitmapImage *image) {
     free(image->bitmap.data);
 }
 
+void clone_bitmap(BitmapImage *dst, BitmapImage *src) {
+    memcpy(dst, src, sizeof(BitmapImage));
+    dst->bitmap.data = malloc(dst->bitmap.row_width * dst->bitmap.height);
+    memcpy(dst->bitmap.data, src->bitmap.data, dst->bitmap.row_width * dst->bitmap.height);
+}
+
 void print_bmpinfo(BitmapImage *image) {
     printf("Magic          = %.2s\n", (char *) &image->header.magic);
 	printf("Size           = %ix%i\n", image->infoHeader.width, image->infoHeader.height);

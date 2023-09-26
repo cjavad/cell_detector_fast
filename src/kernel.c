@@ -22,7 +22,6 @@ typedef struct {
 } Image32f;
 
 void write_image32f(Image32f* image, uint32_t id);
-void write_kernel(Kernel* kernel, uint32_t id);
 
 void image32f_from_bmp(Image32f* out, BitmapData* bmp)
 {
@@ -145,11 +144,7 @@ void write_image32f(Image32f* image, uint32_t id)
 	fclose(fp);
 }
 
-void write_kernel(Kernel* kernel, uint32_t id) {
-    char buff[512];
-	sprintf(buff, "res/kernel__%u.bmp", id);
-	FILE* fp = fopen(buff, "wb");
-
+void write_kernel(FILE* fp, Kernel* kernel) {
 	BitmapImage bmp;
 	create_bitmap(&bmp, kernel->size, kernel->size);
 
@@ -165,19 +160,73 @@ void write_kernel(Kernel* kernel, uint32_t id) {
 	}
 
 	write_bitmap(fp, &bmp);
-
-	fclose(fp);
     free_bitmap(&bmp);
 }
 
-void init_kernel(Kernel* kernel, int32_t size, float sigma) 
-{
-    kernel->size = size;
-    kernel->data = malloc(size * size * sizeof(float));
-
+#define KERNEL_INIT(kernel, size) \
+    kernel->size = size; \
+    kernel->data = malloc(size * size * sizeof(float)); \
     int32_t half = size / 2;
 
+#define KERNEL_NORM_START \
     float sum = 0.0f;
+
+#define KERNEL_NORM_INC(kernel, size, x, y) \
+    sum += kernel->data[y * size + x];
+
+#define KERNEL_NORM_END(kernel, size) \
+    for (int32_t i = 0; i < size * size; i++) { \
+        kernel->data[i] /= fabs(sum); \
+    }
+
+
+void init_gaussian_kernel(Kernel* kernel, int32_t size, float scale_t) {
+    KERNEL_INIT(kernel, size)
+    KERNEL_NORM_START
+
+    for (int32_t x = 0; x < size; x++) {
+        for (int32_t y = 0; y < size; y++) {
+            float dx = (float) (x - half);
+            float dy = (float) (y - half);
+
+            float d = dx * dx + dy * dy;
+            float t = 2.0f * scale_t * scale_t;
+
+            kernel->data[y * size + x] = expf(-d / t) / (2.0f * M_PI * t);
+            KERNEL_NORM_INC(kernel, size, x, y)
+        }
+    }
+
+    KERNEL_NORM_END(kernel, size)
+}
+
+
+void init_laplacian_kernel(Kernel *kernel, int32_t size) {
+    KERNEL_INIT(kernel, size)
+    KERNEL_NORM_START
+
+    for (int32_t x = 0; x < size; x++) {
+        for (int32_t y = 0; y < size; y++) {
+            float dx = (float) (x - half);
+            float dy = (float) (y - half);
+
+            if (dx == 0 && dy == 0) {
+                kernel->data[y * size + x] = -(size - 1) * (size - 1);
+            } else {
+                kernel->data[y * size + x] = fabs(half - (dx + dy));
+            }
+
+            KERNEL_NORM_INC(kernel, size, x, y)
+        }
+    }
+
+    KERNEL_NORM_END(kernel, size)
+}
+
+void init_blur_kernel(Kernel* kernel, int32_t size, float sigma) 
+{
+    KERNEL_INIT(kernel, size)
+    KERNEL_NORM_START
 
     for (int32_t x = 0; x < size; x++) 
     {
@@ -191,7 +240,7 @@ void init_kernel(Kernel* kernel, int32_t size, float sigma)
             weight = d < half ? weight : 0.0f;
 
             kernel->data[y * size + x] = weight;
-            sum += weight;
+            KERNEL_NORM_INC(kernel, size, x, y)
         }
     }
 
