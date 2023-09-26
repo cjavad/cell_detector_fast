@@ -102,7 +102,7 @@ void find_peaks(PeakVec* peaks, BitmapData* bmp) {
     {
         for (uint32_t x = 0; x < bmp->width; x++)
         {
-            if (bmp_get_pixel(bmp, x, y, 0) < 70) continue;
+            if (bmp_get_pixel(bmp, x, y, 0) < 80) continue;
 
             uint32_t peak = find_peak(bmp, x, y);
 

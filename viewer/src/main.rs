@@ -63,6 +63,7 @@ pub enum Selection {
     Input,
     Pass(usize),
     Output,
+    Peaks,
 }
 
 struct Viewer {
@@ -70,6 +71,7 @@ struct Viewer {
     selected: Selection,
     input: Image,
     output: Image,
+    peaks: Image,
 }
 
 impl Viewer {
@@ -82,6 +84,7 @@ impl Viewer {
             selected: Selection::Output,
             input: Image::default(),
             output: Image::default(),
+            peaks: Image::default(),
         }
     }
 
@@ -89,7 +92,7 @@ impl Viewer {
         let mut args = Vec::new();
 
         args.push(String::from("-i"));
-        args.push(String::from("samples/easy/1EASY.bmp"));
+        args.push(String::from("samples/medium/1MEDIUM.bmp"));
         args.push(String::from("-o"));
         args.push(format!("{}/output.bmp", Self::DIST_DIR));
         args.push(String::from("-p"));
@@ -133,18 +136,14 @@ impl Viewer {
         let mut command = Command::new(bin);
         command.args(args);
 
-        fs::create_dir_all(Self::PASS_DIR).unwrap();
+        println!("Running: {:?}", command);
 
         match command.output() {
             Ok(output) => {
                 info!("Output: {}", String::from_utf8_lossy(&output.stdout));
 
-                for (i, pass) in self.passes.iter_mut().enumerate() {
-                    if !pass.enabled {
-                        continue;
-                    }
-
-                    let path = format!("{}/kernel_pass_{}.bmp", Self::PASS_DIR, i);
+                for (i, pass) in self.passes.iter_mut().filter(|p| p.enabled).enumerate() {
+                    let path: String = format!("{}/kernel_pass_{}.bmp", Self::PASS_DIR, i);
                     let data = fs::read(path).unwrap();
                     pass.output = Image::load_data(data);
 
@@ -155,9 +154,11 @@ impl Viewer {
 
                 let input_path = Path::new("samples/easy/1EASY.bmp");
                 let output_path = Path::new(Self::DIST_DIR).join("output.bmp");
+                let peaks_path = Path::new(Self::PASS_DIR).join("peaks.bmp");
 
                 self.input = Image::load_data(fs::read(input_path).unwrap());
                 self.output = Image::load_data(fs::read(output_path).unwrap());
+                self.peaks = Image::load_data(fs::read(peaks_path).unwrap());
             }
             Err(err) => {
                 error!("Failed to run cells: {}", err);
@@ -367,11 +368,24 @@ impl Viewer {
         }))
     }
 
+    fn select_peaks_button(&mut self) -> impl View<Self> {
+        if !Path::new(Self::PASS_DIR).join("peaks.bmp").exists() {
+            return None;
+        }
+
+        let select = button(text("Select Peaks")).padding(rem(0.3));
+
+        Some(on_press(select, |_, data: &mut Self| {
+            data.selected = Selection::Peaks;
+        }))
+    }
+
     fn output(&mut self) -> impl View<Self> {
         match self.selected {
             Selection::Input => self.input.clone(),
             Selection::Pass(i) => self.passes[i].output.clone(),
             Selection::Output => self.output.clone(),
+            Selection::Peaks => self.peaks.clone(),
         }
     }
 
@@ -380,6 +394,7 @@ impl Viewer {
             self.select_input_button(),
             self.pass_list(),
             self.select_output_button(),
+            self.select_peaks_button(),
             self.add_gaussian_button(),
             self.add_laplacian_button(),
             self.run_button(),

@@ -60,6 +60,14 @@ void process_bitmap(BitmapImage *image) {
 
         // Draw cross here with center at x, y on top of image
         draw_cross(&image->bitmap, x, y, 255, 0, 0);
+        draw_cross(&bmp.bitmap, x, y, 255, 0, 0);
+    }
+
+    if (pass_dir != NULL) {
+        FILE* fp;
+        char buff[512];
+        sprintf(buff, "%s/peaks.bmp", pass_dir);
+        DEBUG_BMP(&bmp, buff);
     }
 
     free_bitmap(&bmp);
