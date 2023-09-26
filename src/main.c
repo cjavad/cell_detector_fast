@@ -69,8 +69,6 @@ void process_samples(const int sample_type) {
         // grayscale_to_bmp(samples[i]->output_bmp, GrayScale *output);
         write_sample(samples[i]);
         free_sample(samples[i]);
-
-        break;
     }
 
     free(samples);
@@ -79,8 +77,8 @@ void process_samples(const int sample_type) {
 int32_t main()
 {
     process_samples(EASY);
-    //process_samples(MEDIUM);
-    //process_samples(HARD);
-    //process_samples(IMPOSSIBLE);
+    process_samples(MEDIUM);
+    process_samples(HARD);
+    process_samples(IMPOSSIBLE);
 	return 0;
 }
