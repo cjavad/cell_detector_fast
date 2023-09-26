@@ -1,0 +1,3 @@
+[workspace]
+members = ["viewer"]
+resolver = "2"
