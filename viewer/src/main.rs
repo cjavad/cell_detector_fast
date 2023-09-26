@@ -75,9 +75,12 @@ impl Viewer {
     fn generate_arguments(&mut self) -> Vec<String> {
         let mut args = Vec::new();
 
-        args.push(String::from("--input samples/easy/1EASY.bmp"));
-        args.push(format!("--output {}/output.bmp", Self::DIST_DIR));
-        args.push(format!("--pass-dir {}", Self::PASS_DIR));
+        args.push(String::from("-i"));
+        args.push(String::from("samples/easy/1EASY.bmp"));
+        args.push(String::from("-o"));
+        args.push(format!("{}/output.bmp", Self::DIST_DIR));
+        args.push(String::from("-p"));
+        args.push(format!("{}/", Self::PASS_DIR));
 
         for pass in self.passes.iter() {
             if !pass.enabled {
@@ -86,13 +89,18 @@ impl Viewer {
 
             match pass.kind {
                 PassKind::Gaussian(ref gaussian) => {
-                    args.push(String::from("--kernel 1"));
-                    args.push(format!("--kernel-size {}", gaussian.size));
-                    args.push(format!("--kernel-args {}", gaussian.sigma));
+                    args.push(String::from("-k"));
+                    args.push(String::from("1"));
+                    args.push(String::from("-z"));
+                    args.push(gaussian.size.to_string());
+                    args.push(String::from("-a"));
+                    args.push(gaussian.sigma.to_string());
                 }
                 PassKind::Laplacian(ref laplacian) => {
-                    args.push(String::from("--kernel 2"));
-                    args.push(format!("--kernel-size {}", laplacian.size));
+                    args.push(String::from("-k"));
+                    args.push(String::from("2"));
+                    args.push(String::from("-z"));
+                    args.push(laplacian.size.to_string());
                 }
             }
         }
@@ -109,16 +117,21 @@ impl Viewer {
             "dist/linux/cells.exe"
         };
 
-        let command = Command::new(bin).args(args).output();
+        let mut command = Command::new(bin);
+        command.args(args);
 
-        match command {
-            Ok(_) => {
+        println!("Running: {:?}", command);
+
+        match command.output() {
+            Ok(output) => {
+                info!("Ran cells: {}", String::from_utf8_lossy(&output.stdout));
+
                 for (i, pass) in self.passes.iter_mut().enumerate() {
                     if !pass.enabled {
                         continue;
                     }
 
-                    let path = format!("{}/kernel_{}.bmp", Self::PASS_DIR, i);
+                    let path = format!("{}/kernel_pass_{}.bmp", Self::PASS_DIR, i);
                     let data = std::fs::read(path).unwrap();
                     pass.output = Image::load_data(data);
                 }
@@ -157,7 +170,9 @@ impl Viewer {
         let pass = &mut self.passes[index];
 
         let enabled = on_press(
-            checkbox(pass.enabled).border_radius(pt(12.0)),
+            checkbox(pass.enabled)
+                .border_radius(pt(12.0))
+                .color(style(Palette::PRIMARY)),
             move |_, data: &mut Self| {
                 data.passes[index].enabled = !data.passes[index].enabled;
             },
