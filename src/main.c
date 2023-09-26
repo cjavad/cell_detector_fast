@@ -21,7 +21,12 @@ void process_samples(const int sample_type) {
     uint32_t count;
     sample_t** samples;
 
-    get_samples(&samples, &count, sample_type);
+    Kernel first_kernel;
+    init_kernel(&first_kernel, 9, 0.0f);
+
+    write_kernel(&first_kernel, 0);
+
+    get_samples(&samples, &count, sample_type); 
 
     for (int i = 0; i < count; i++) {
         char* name = samples[i]->sample_name;
@@ -35,18 +40,7 @@ void process_samples(const int sample_type) {
         // Initially output bmp is a copy of input bmp
         // create_bitmap(samples[i]->output_bmp, inputImage.bitmap.width, inputImage.bitmap.height);
 
-        samples[i]->output_bmp = &inputImage;
-
-        Kernel first_kernel;
-        Kernel second_kernel;
-        Kernel third_kernel;
-        init_kernel(&first_kernel, 13, 25.0f);
-        init_kernel(&second_kernel, 11, 1.0f);
-        init_kernel(&third_kernel, 7, 25.0f);
-
-        write_kernel(&first_kernel, 0);
-        write_kernel(&second_kernel, 1);
-        write_kernel(&third_kernel, 2);
+        samples[i]->output_bmp = &inputImage; 
 
         // mark_cells(&&inputImage.bitmap);
         PeakVec peaks;
@@ -76,6 +70,7 @@ void process_samples(const int sample_type) {
         free_sample(samples[i]);
     }
 
+    free_kernel(&first_kernel);
     free(samples);
 }
 

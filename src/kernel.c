@@ -55,7 +55,7 @@ void kernel_instance(Image32f* out, Image32f* in, Kernel* kernel, int32_t cx, in
 		}
 	}
 
-	out->data[(in->offset + cy) * in->stride + in->offset + cx] = sum;
+	out->data[(in->offset + cy) * in->stride + in->offset + cx] = clamp(sum, 0.0, 1.0);
 }
 
 void run_kernel(Image32f* out, Image32f* in, Kernel* kernel)
@@ -90,6 +90,7 @@ void image32f_to_bitmap(Image32f* image, BitmapData* bmp) {
 void kernel_pass(BitmapData* bmp, Kernel* kernel)
 {
 	Image32f image;
+	Image32f buffer;
 
 	image.width = bmp->width;
 	image.height = bmp->height;
@@ -97,22 +98,16 @@ void kernel_pass(BitmapData* bmp, Kernel* kernel)
 	image.stride = image.width + 2 * image.offset;
 	image.data = calloc(1, (image.width + 2 * image.offset) * (image.height + 2 * image.offset) * sizeof(float));
 
-	Image32f buffer;
-
 	buffer.width = image.width;
 	buffer.height = image.height;
 	buffer.offset = image.offset;
 	buffer.stride = image.stride;
 	buffer.data = calloc(1, (buffer.width + 2 * buffer.offset) * (buffer.height + 2 * buffer.offset) * sizeof(float));	
 
-	//kfilter(&buffer, bmp, &pixels, 30);
-	//write_image32f(&buffer, 0); 
-
     image32f_from_bmp(&buffer, bmp);
 	run_kernel(&image, &buffer, kernel);
     free(buffer.data);    
 
-	//normalize(&image, &image, &pixels);
 	write_image32f(&image, 2);
     image32f_to_bitmap(&image, bmp);
     
@@ -163,15 +158,16 @@ void write_kernel(Kernel* kernel, uint32_t id) {
 		uint32_t bmp_offset = y * bmp.bitmap.row_width;
 		for (uint32_t x = 0; x < kernel->size; x++)
 		{
-			bmp.bitmap.data[bmp_offset + x * 3 + 0] = (uint8_t)(kernel->data[y * kernel->size + x] * 255.0f * 10.0);
-			bmp.bitmap.data[bmp_offset + x * 3 + 1] = (uint8_t)(kernel->data[y * kernel->size + x] * 255.0f * 10.0);
-            bmp.bitmap.data[bmp_offset + x * 3 + 2] = (uint8_t)(kernel->data[y * kernel->size + x] * 255.0f * 10.0);
+			bmp.bitmap.data[bmp_offset + x * 3 + 0] = (uint8_t)(kernel->data[y * kernel->size + x] * 255.0f * 100.0);
+			bmp.bitmap.data[bmp_offset + x * 3 + 1] = (uint8_t)(kernel->data[y * kernel->size + x] * 255.0f * 100.0);
+            bmp.bitmap.data[bmp_offset + x * 3 + 2] = (uint8_t)(kernel->data[y * kernel->size + x] * 255.0f * 100.0);
 		}
 	}
 
 	write_bitmap(fp, &bmp);
 
 	fclose(fp);
+    free_bitmap(&bmp);
 }
 
 void init_kernel(Kernel* kernel, int32_t size, float sigma) 
@@ -190,9 +186,9 @@ void init_kernel(Kernel* kernel, int32_t size, float sigma)
             float dx = (float) (x - half);
             float dy = (float) (y - half);
 
-            float d = 1.0 - sqrtf(dx * dx + dy * dy) / half;
-            float weight = d * expf(-d * d / (2.0f * sigma * sigma));
-            weight = d > 0.0 ? weight : 0.0f;
+            float d = sqrtf(dx * dx + dy * dy);
+            float weight = 1.0 - d / half;
+            weight = d < half ? weight : 0.0f;
 
             kernel->data[y * size + x] = weight;
             sum += weight;
@@ -201,7 +197,8 @@ void init_kernel(Kernel* kernel, int32_t size, float sigma)
 
     for (int32_t i = 0; i < size * size; i++) 
     {
-        kernel->data[i] /= sum;
+        kernel->data[i] /= fabs(sum);
+        kernel->data[i] *= 0.9;
     }
 
     printf("Kernel sum: %f\n", sum);
