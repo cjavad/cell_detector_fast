@@ -130,7 +130,7 @@ impl Viewer {
         let mut command = Command::new(bin);
         command.args(args);
 
-        println!("Running: {:?}", command);
+        fs::create_dir_all(Self::PASS_DIR).unwrap();
 
         match command.output() {
             Ok(output) => {
