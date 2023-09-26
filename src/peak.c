@@ -49,6 +49,7 @@ uint32_t find_peak(BitmapData* bmp, uint32_t x, uint32_t y) {
         uint8_t nval = bmp->data[neighbor]; 
 
         if (nval <= val) return index;
+        
         index = neighbor;
         x = neighbor % bmp->row_width / bmp->byte_pp;
         y = neighbor / bmp->row_width;
@@ -56,12 +57,17 @@ uint32_t find_peak(BitmapData* bmp, uint32_t x, uint32_t y) {
     }
 }
 
+#define MAX_DIST 15
+
 void remove_peak(BitmapData* bmp, uint32_t x, uint32_t y) 
 {
     PeakVec indices;
     vec_init(&indices);
 
     vec_push(&indices, bmp_get_pixel_offset(bmp, x, y));
+
+    int cx = x;
+    int cy = y;
 
     while (indices.len > 0) {
         uint32_t index = vec_pop(&indices);
@@ -83,6 +89,8 @@ void remove_peak(BitmapData* bmp, uint32_t x, uint32_t y)
 
                 if (nx < 0 || ny < 0) continue;
                 if (nx >= bmp->width || ny >= bmp->height) continue;
+
+                if (abs(nx - cx) > MAX_DIST || abs(ny - cy) > MAX_DIST) continue;
  
                 uint8_t neighbor = bmp_get_pixel(bmp, nx, ny, 0);
 

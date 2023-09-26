@@ -53,7 +53,7 @@ void free_bitmap(BitmapImage* image);
 void clone_bitmap(BitmapImage* dst, BitmapImage* src);
 
 void draw_cross(BitmapData* bmp, uint32_t x, uint32_t y, uint8_t r, uint8_t g, uint8_t b);
-
+void bmp_filter(BitmapData* bmp, uint32_t threshold);
 
 uint32_t bmp_get_pixel_offset(BitmapData* bmp, uint32_t x, uint32_t y);
 uint8_t bmp_get_pixel(BitmapData* bmp, uint32_t x, uint32_t y, uint8_t channel);

@@ -24,6 +24,7 @@ Vec(Kernel) kernels;
 int kernel_type = 0;
 int kernel_size = 0;
 float kernel_arg = 0;
+float kernel_arg2 = 0;
 int sample_type = EASY;
 char* pass_dir = NULL;
 char* input = NULL;
@@ -51,6 +52,8 @@ void process_bitmap(BitmapImage *image) {
 
     printf("Found %u peaks\n", peaks.len);
 
+    // bmp_filter(&image->bitmap, 88);
+
     for (uint32_t j = 0; j < peaks.len; j++) {
         uint32_t peak = peaks.data[j];
         bmp_set_offset(&bmp.bitmap, peak, 255, 0, 0);
@@ -63,11 +66,15 @@ void process_bitmap(BitmapImage *image) {
         draw_cross(&bmp.bitmap, x, y, 255, 0, 0);
     }
 
+
     if (pass_dir != NULL) {
         FILE* fp;
         char buff[512];
         sprintf(buff, "%s/peaks.bmp", pass_dir);
         DEBUG_BMP(&bmp, buff);
+
+        /*sprintf(buff, "%s/debug.bmp", pass_dir);
+        DEBUG_BMP(&bmp, buff);*/
     }
 
     free_bitmap(&bmp);
@@ -118,9 +125,10 @@ void process_single() {
 #define OPT_KERNEL 3
 #define OPT_KERNEL_SIZE 4
 #define OPT_KERNEL_ARG 5
-#define OPT_INPUT 6 
-#define OPT_OUTPUT 7
-#define OPT_PASS_DIR 8
+#define OPT_KERNEL_ARG2 6
+#define OPT_INPUT 7
+#define OPT_OUTPUT 8
+#define OPT_PASS_DIR 9
 
 void create_kernel() {
     // Initialize kernel
@@ -134,6 +142,10 @@ void create_kernel() {
         case 2:
             printf("Initializing laplacian kernel with size: %d\n", kernel_size);
             init_laplacian_kernel(&kernel, kernel_size);
+            break;
+        case 3:
+            printf("Initializing LoG with size: %d\n", kernel_size);
+            init_log_kernel(&kernel, kernel_size, kernel_arg, kernel_arg2);
             break;
         default:
             break;
@@ -181,6 +193,12 @@ int32_t main(int argc, char** argv)
             continue;
         }
 
+        if (mode == OPT_KERNEL_ARG2) {
+            kernel_arg2 = atof(argv[i]);
+            mode = OPT_DEFAULT;
+            continue;
+        }
+
         if (mode == OPT_INPUT) {
             input = argv[i];
             mode = OPT_DEFAULT;
@@ -221,6 +239,11 @@ int32_t main(int argc, char** argv)
 
         if (strcmp(argv[i], "-a") == 0 || strcmp(argv[i], "--kernel-arg") == 0) {
             mode = OPT_KERNEL_ARG;
+            continue;
+        }
+
+        if (strcmp(argv[i], "-b") == 0 || strcmp(argv[i], "--kernel-arg2") == 0) {
+            mode = OPT_KERNEL_ARG2;
             continue;
         }
 
@@ -267,6 +290,7 @@ int32_t main(int argc, char** argv)
         printf("  0\t NONE\n");
         printf("  1\t GAUSSIAN\n");
         printf("  2\t LAPLACIAN\n");
+        printf("  3\t LoG\n");
 
         return 0;
     }

@@ -189,7 +189,7 @@ void print_kernel(Kernel *kernel) {
     }
 
 
-void init_gaussian_kernel(Kernel* kernel, int32_t size, float scale_t) {
+void init_gaussian_kernel(Kernel* kernel, int32_t size, float scale) {
     KERNEL_INIT(kernel, size)
     KERNEL_NORM_START
 
@@ -199,7 +199,7 @@ void init_gaussian_kernel(Kernel* kernel, int32_t size, float scale_t) {
             float dy = (float) (y - half);
 
             float d = dx * dx + dy * dy;
-            float t = 2.0f * scale_t * scale_t;
+            float t = 2.0f * scale * scale;
 
             kernel->data[y * size + x] = expf(-d / t) / (2.0f * M_PI * t);
             KERNEL_NORM_INC(kernel, size, x, y)
@@ -258,8 +258,32 @@ void init_blur_kernel(Kernel* kernel, int32_t size, float sigma)
         kernel->data[i] /= fabs(sum);
         kernel->data[i] *= 0.9;
     }
+}
 
-    printf("Kernel sum: %f\n", sum);
+
+// https://homepages.inf.ed.ac.uk/rbf/HIPR2/log.htm Laplacian of Gaussian
+void init_log_kernel(Kernel *kernel, int32_t size, float sigma, float scale)
+{
+    KERNEL_INIT(kernel, size)    
+
+    for (int32_t x = 0; x < size; x++) 
+    {
+        for (int32_t y = 0; y < size; y++) 
+        {
+            float dx = (float) (x - half);
+            float dy = (float) (y - half);
+
+            // x**2 + y**2
+            float d = dx * dx + dy * dy;
+
+            // 2 * sigma**2
+            float t = 2.0f * sigma * sigma;
+
+            kernel->data[y * size + x] = scale * (-1.0f / (M_PI * sigma * sigma * sigma * sigma)) * (1.0f - (d / t)) * expf(-d / t);
+        }
+    }
+
+    print_kernel(kernel);
 }
 
 void free_kernel(Kernel *kernel) 
