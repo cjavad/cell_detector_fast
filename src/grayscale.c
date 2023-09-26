@@ -13,12 +13,8 @@ void bmp_to_grayscale(BitmapData *bitmap, GrayScale *image) {
 
     for (uint32_t y = 0; y < image->height; y++) {
         for (uint32_t x = 0; x < image->width; x++) {
-            uint8_t r = bitmap->data[y * bitmap->row_width + x * bitmap->byte_pp + 0];
-            uint8_t g = bitmap->data[y * bitmap->row_width + x * bitmap->byte_pp + 1];
-            uint8_t b = bitmap->data[y * bitmap->row_width + x * bitmap->byte_pp + 2];
-
             // Filter really close-to-black pixels away from the r channel e(only one we care about)
-            image->data[y * image->width + x] = r ;//>= 128 ? 255 : 0;
+            image->data[y * image->width + x] = bitmap->data[bmp_get_pixel_offset(bitmap, x, y)];//>= 128 ? 255 : 0;
         }
     }
 }

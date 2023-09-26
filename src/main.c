@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/types.h>
 
 #include "bitmap.h"
 #include "grayscale.h"
@@ -37,18 +38,25 @@ void process_samples(const int sample_type) {
 
         samples[i]->output_bmp = &inputImage;
 
-        fft_test(&samples[i]->output_bmp->bitmap);
+        fft_test(&inputImage.bitmap);
 
-        // mark_cells(&samples[i]->output_bmp->bitmap);
-        kernel_pass(&samples[i]->output_bmp->bitmap);
-        PeakVec peaks = find_peaks(&samples[i]->output_bmp->bitmap);
+        // mark_cells(&&inputImage.bitmap);
+        kernel_pass(&inputImage.bitmap);
+        PeakVec peaks = find_peaks(&inputImage.bitmap);
         printf("peaks: %u\n", peaks.len);
 
         for (uint32_t j = 0; j < peaks.len; j++) {
             uint32_t peak = peaks.data[j];
-            samples[i]->output_bmp->bitmap.data[peak] = 0;
-            samples[i]->output_bmp->bitmap.data[peak + 1] = 0;
-            samples[i]->output_bmp->bitmap.data[peak + 2] = 255;
+            bmp_set_offset(&inputImage.bitmap, peak, 255, 0, 0);
+
+
+            uint32_t x = (peak / inputImage.bitmap.byte_pp) % inputImage.bitmap.row_width;
+            uint32_t y = (peak / inputImage.bitmap.byte_pp) / inputImage.bitmap.row_width;
+
+
+            // Draw cross here with center at x, y
+            draw_cross(&inputImage, x, y, 255, 0, 0);
+    
         }
 
         // grayscale_to_bmp(samples[i]->output_bmp, GrayScale *output);

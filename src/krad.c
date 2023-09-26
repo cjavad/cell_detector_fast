@@ -1,5 +1,6 @@
 #include "krad.h"
 
+#include "bitmap.h"
 #include "grayscale.h"
 #include <stdint.h>
 
@@ -27,9 +28,13 @@ void krad_debug_snapshot(uint32_t id, GrayScale* image, GrayScale* buffer, Pixel
 		uint32_t offset = y * 950;
 		for (uint32_t x = 0; x < 950; x++)
 		{
-			bmp.bitmap.data[offsetBMP + 3 * x + 1] = buffer->data[offset + x];
-			bmp.bitmap.data[offsetBMP + 3 * x + 0] = buffer->data[offset + x];
-			bmp.bitmap.data[offsetBMP + 3 * x + 2] = 0;
+            bmp_set_offset(
+                &bmp.bitmap, 
+                offsetBMP + 3 * x,
+                0,
+                buffer->data[offset + x],
+                buffer->data[offset + x]
+            );
 		}
 
 		for (uint32_t i = 0; i < pixels->count; i++)

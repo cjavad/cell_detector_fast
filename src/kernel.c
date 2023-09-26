@@ -129,9 +129,13 @@ void image32f_to_bitmap(Image32f* image, BitmapData* bmp) {
 		uint32_t img_offset = (y + image->offset) * image->stride + image->offset;
 		for (uint32_t x = 0; x < image->width; x++)
 		{
-			bmp->data[bmp_offset + x * 3 + 0] = (uint8_t)(image->data[img_offset + x] * 255.0f);
-			bmp->data[bmp_offset + x * 3 + 1] = (uint8_t)(image->data[img_offset + x] * 255.0f);
-			bmp->data[bmp_offset + x * 3 + 2] = (uint8_t)(image->data[img_offset + x] * 255.0f);
+            bmp_set_offset(
+                bmp,
+                bmp_offset + x * 3, 
+                (uint8_t)(image->data[img_offset + x] * 255.0f),
+                (uint8_t)(image->data[img_offset + x] * 255.0f),
+                (uint8_t)(image->data[img_offset + x] * 255.0f)
+            );
 		}
 	}
 }
@@ -183,9 +187,13 @@ void write_image32f(Image32f* image, uint32_t id)
 		uint32_t img_offset = (y + image->offset) * image->stride + image->offset;
 		for (uint32_t x = 0; x < image->width; x++)
 		{
-			bmp.bitmap.data[bmp_offset + x * 3 + 0] = (uint8_t)(image->data[img_offset + x] * 255.0f);
-			bmp.bitmap.data[bmp_offset + x * 3 + 1] = (uint8_t)(image->data[img_offset + x] * 255.0f);
-			bmp.bitmap.data[bmp_offset + x * 3 + 2] = (uint8_t)(image->data[img_offset + x] * 255.0f);
+            bmp_set_offset(
+                &bmp.bitmap,
+                bmp_offset + x * 3, 
+                (uint8_t)(image->data[img_offset + x] * 255.0f),
+                (uint8_t)(image->data[img_offset + x] * 255.0f),
+                (uint8_t)(image->data[img_offset + x] * 255.0f)
+            );
 		}
 	}
 

@@ -262,10 +262,7 @@ void detect_cell(BitmapData* bmp, GrayScale* image, int32_t cx, int32_t cy)
             for (int32_t x = minx; x < maxx; x++)
             {
 				uint32_t dist = (cy - y) * (cy - y) + (cx - x) * (cx - x);
-                // if (dist > RSIZE * RSIZE) continue;
-				bmp->data[y * bmp->row_width + (x * 3) + 0] = 0;
-				bmp->data[y * bmp->row_width + (x * 3) + 1] = 0;
-                bmp->data[y * bmp->row_width + (x * 3) + 2] = 255;
+                bmp_set_pixels(bmp, x, y, 255, 0, 0);
             }
         }
     }
