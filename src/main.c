@@ -50,8 +50,8 @@ void process_samples(const int sample_type) {
             bmp_set_offset(&inputImage.bitmap, peak, 255, 0, 0);
 
 
-            uint32_t x = (peak / inputImage.bitmap.byte_pp) % inputImage.bitmap.row_width;
-            uint32_t y = (peak / inputImage.bitmap.byte_pp) / inputImage.bitmap.row_width;
+            uint32_t x = (peak % inputImage.bitmap.row_width) / inputImage.bitmap.byte_pp;
+            uint32_t y = peak / inputImage.bitmap.row_width;
 
 
             // Draw cross here with center at x, y

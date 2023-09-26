@@ -118,5 +118,5 @@ void draw_cross(BitmapImage *image, uint32_t x, uint32_t y, uint8_t r, uint8_t g
         bmp_set_pixels(&image->bitmap, x, y - i, r, g, b);
     }
 
-    bmp_set_pixels(&image->bitmap, x, y, 255, 255, 255);
+    bmp_set_pixels(&image->bitmap, x, y, 255, 0, 0);
 }
