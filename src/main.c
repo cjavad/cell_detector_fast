@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
 #include <sys/types.h>
 
 #include "bitmap.h"
@@ -233,7 +234,6 @@ int32_t main(int argc, char** argv)
 
     if (kernel_type != 0) create_kernel();
 
-    printf("Running with %d kernels\n", kernels.len);
 
     if (mode == OPT_HELP) {
         printf("Usage: %s [options]\n", argv[0]);
@@ -263,8 +263,12 @@ int32_t main(int argc, char** argv)
         return 0;
     }
 
+    printf("Running with %d kernels\n", kernels.len);
+
     // if not pass_dir exists, create it
-    if (pass_dir != NULL) {
+    struct stat st;
+    
+    if (!S_ISDIR(stat(pass_dir, &st) == 0 ? st.st_mode : 0)) {
         mkdir(pass_dir, 0777);
     }
 

@@ -229,8 +229,6 @@ void init_laplacian_kernel(Kernel *kernel, int32_t size) {
         }
     }
 
-    print_kernel(kernel);
-
     KERNEL_NORM_END(kernel, size)
 }
 
