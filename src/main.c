@@ -23,8 +23,6 @@ void process_samples(const int sample_type) {
 
     get_samples(&samples, &count, sample_type);
 
-    print_kernel();
-
     for (int i = 0; i < count; i++) {
         char* name = samples[i]->sample_name;
 
@@ -39,15 +37,22 @@ void process_samples(const int sample_type) {
 
         samples[i]->output_bmp = &inputImage;
 
-        // mark_cells(&&inputImage.bitmap);
-        kernel_pass(&inputImage.bitmap);
-        
-        PeakVec peaks;
+        Kernel first_kernel;
+        Kernel second_kernel;
+        Kernel third_kernel;
+        init_kernel(&first_kernel, 13, 25.0f);
+        init_kernel(&second_kernel, 11, 1.0f);
+        init_kernel(&third_kernel, 7, 25.0f);
 
+        write_kernel(&first_kernel, 0);
+        write_kernel(&second_kernel, 1);
+        write_kernel(&third_kernel, 2);
+
+        // mark_cells(&&inputImage.bitmap);
+        PeakVec peaks;
         vec_init(&peaks);
-        
+        kernel_pass(&inputImage.bitmap, &first_kernel);
         find_peaks(&peaks, &inputImage.bitmap);
-        
         printf("peaks: %u\n", peaks.len);
 
         for (uint32_t j = 0; j < peaks.len; j++) {

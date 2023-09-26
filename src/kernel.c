@@ -13,24 +13,6 @@
 #define clamp(x, a, b) (max(min(x, b), a))
 #define swap(a, b) {void* swap_temp = a; a = b; b = swap_temp;}
 
-
-#include "kernel.i"
-
-typedef struct {
-	uint32_t count;
-	struct {
-		uint16_t x;
-		uint16_t y;
-	}
-	p[952 * 952 / 4];
-} PixelList;
-
-typedef struct {
-	uint32_t width;
-	uint32_t height;
-	float* data;
-} Kernel;
-
 typedef struct {
 	uint32_t width;
 	uint32_t height;
@@ -40,86 +22,51 @@ typedef struct {
 } Image32f;
 
 void write_image32f(Image32f* image, uint32_t id);
+void write_kernel(Kernel* kernel, uint32_t id);
 
-void kfilter(Image32f* out, BitmapData* bmp, PixelList* pixels, uint8_t thold)
+void image32f_from_bmp(Image32f* out, BitmapData* bmp)
 {
 	for (uint32_t y = 0; y < bmp->height; y++)
 	{
 		uint32_t bmp_offset = y * bmp->row_width;
 		uint32_t img_offset = (y + out->offset) * out->stride + out->offset;
-		for (uint32_t x = 0; x < bmp->width; x++)
-		{
-			if (bmp->data[bmp_offset + x * 3] > thold) {
-				out->data[img_offset + x] = 1.0f;
-				pixels->p[pixels->count].x = x;
-				pixels->p[pixels->count].y = y;
-				pixels->count++;
-			} else {
-				out->data[img_offset + x] = 0.0f;
-			}
+		for (uint32_t x = 0; x < bmp->width; x++) {
+            out->data[img_offset + x] = (float) bmp->data[bmp_offset + x * 3] / 255.0f;
 		}
 	}
 }
 
-void normalize(Image32f* out, Image32f* in, PixelList* pixels)
-{
-	float max = 0;
-	float min = 100;
-	for (uint32_t i = 0; i < pixels->count; i++)
-	{
-		uint32_t x = pixels->p[i].x;
-		uint32_t y = pixels->p[i].y;
-
-		if (in->data[(y + in->offset) * in->stride + in->offset + x] > max)
-		{
-			max = in->data[(y + in->offset) * in->stride + in->offset + x];
-		}
-		if (in->data[(y + in->offset) * in->stride + in->offset + x] < min)
-		{
-			min = in->data[(y + in->offset) * in->stride + in->offset + x];
-		}
-	}
-
-	max = 1 / (max - min);
-
-	for (uint32_t y = 0; y < in->height; y++)
-	{
-		for (uint32_t x = 0; x < in->width; x++)
-		{
-			out->data[(y + out->offset) * out->stride + out->offset + x] = 
-				in->data[(y + in->offset) * in->stride + in->offset + x] * max - min;
-		}
-	}
-}
-
-void kernel_instance(Image32f* out, Image32f* in, int32_t cx, int32_t cy)
+void kernel_instance(Image32f* out, Image32f* in, Kernel* kernel, int32_t cx, int32_t cy)
 {
 	float sum = 0;
 
-    uint32_t base_x = cx + in->offset - KERNEL_HALF;
-    uint32_t base_y = cy + in->offset - KERNEL_HALF;
+    uint32_t base_x = cx + in->offset - kernel->size / 2;
+    uint32_t base_y = cy + in->offset - kernel->size / 2;
 	uint32_t img_base = base_y * in->stride + base_x;
 
-	for (int32_t y = 0; y < KERNEL_SIZE; y++)
+	for (int32_t y = 0; y < kernel->size; y++)
 	{
 		uint32_t img_offset = img_base + y * in->stride;
-		uint32_t ker_offset = y * KERNEL_SIZE;
+		uint32_t ker_offset = y * kernel->size;
 
-		for (int32_t x = 0; x < KERNEL_SIZE; x++)
+		for (int32_t x = 0; x < kernel->size; x++)
 		{
-			sum += kernel[ker_offset + x] * in->data[img_offset + x];
+			sum += kernel->data[ker_offset + x] * in->data[img_offset + x];
 		}
 	}
 
 	out->data[(in->offset + cy) * in->stride + in->offset + cx] = sum;
 }
 
-void run_kernel(Image32f* out, Image32f* in, PixelList* pixels)
+void run_kernel(Image32f* out, Image32f* in, Kernel* kernel)
 {
-	for (uint32_t i = 0; i < pixels->count; i++) 
-	{
-		kernel_instance(out, in, pixels->p[i].x, pixels->p[i].y);
-	}
+	for (int32_t x = 0; x < in->width; x++)
+    {
+        for (int32_t y = 0; y < in->height; y++)
+        {
+            kernel_instance(out, in, kernel, x, y);
+        }
+    }
 }
 
 void image32f_to_bitmap(Image32f* image, BitmapData* bmp) {
@@ -140,13 +87,13 @@ void image32f_to_bitmap(Image32f* image, BitmapData* bmp) {
 	}
 }
 
-void kernel_pass(BitmapData* bmp)
+void kernel_pass(BitmapData* bmp, Kernel* kernel)
 {
 	Image32f image;
 
 	image.width = bmp->width;
 	image.height = bmp->height;
-	image.offset = ALIGN_8(KERNEL_SIZE - KERNEL_HALF);
+	image.offset = ALIGN_8(32);
 	image.stride = image.width + 2 * image.offset;
 	image.data = calloc(1, (image.width + 2 * image.offset) * (image.height + 2 * image.offset) * sizeof(float));
 
@@ -156,16 +103,13 @@ void kernel_pass(BitmapData* bmp)
 	buffer.height = image.height;
 	buffer.offset = image.offset;
 	buffer.stride = image.stride;
-	buffer.data = calloc(1, (buffer.width + 2 * buffer.offset) * (buffer.height + 2 * buffer.offset) * sizeof(float));
-	// printf("width = %u\nheight=%u\noffset=%u\nstride=%u\n", image.width, image.height, image.offset, image.stride);
-	// if (!image.data) printf("fuck\n");
-	PixelList pixels;
-	pixels.count = 0;
+	buffer.data = calloc(1, (buffer.width + 2 * buffer.offset) * (buffer.height + 2 * buffer.offset) * sizeof(float));	
 
-	kfilter(&buffer, bmp, &pixels, 88);
-	write_image32f(&buffer, 0);
+	//kfilter(&buffer, bmp, &pixels, 30);
+	//write_image32f(&buffer, 0); 
 
-	run_kernel(&image, &buffer, &pixels);
+    image32f_from_bmp(&buffer, bmp);
+	run_kernel(&image, &buffer, kernel);
     free(buffer.data);    
 
 	//normalize(&image, &image, &pixels);
@@ -206,37 +150,64 @@ void write_image32f(Image32f* image, uint32_t id)
 	fclose(fp);
 }
 
-float kernel_weight(int32_t x, int32_t y)
-{
-    float dist = sqrt((x * x) + (y * y)); 
-    return dist > KERNEL_HALF ? 0 : dist; 
+void write_kernel(Kernel* kernel, uint32_t id) {
+    char buff[512];
+	sprintf(buff, "res/kernel__%u.bmp", id);
+	FILE* fp = fopen(buff, "wb");
+
+	BitmapImage bmp;
+	create_bitmap(&bmp, kernel->size, kernel->size);
+
+	for (uint32_t y = 0; y < kernel->size; y++)
+	{
+		uint32_t bmp_offset = y * bmp.bitmap.row_width;
+		for (uint32_t x = 0; x < kernel->size; x++)
+		{
+			bmp.bitmap.data[bmp_offset + x * 3 + 0] = (uint8_t)(kernel->data[y * kernel->size + x] * 255.0f * 10.0);
+			bmp.bitmap.data[bmp_offset + x * 3 + 1] = (uint8_t)(kernel->data[y * kernel->size + x] * 255.0f * 10.0);
+            bmp.bitmap.data[bmp_offset + x * 3 + 2] = (uint8_t)(kernel->data[y * kernel->size + x] * 255.0f * 10.0);
+		}
+	}
+
+	write_bitmap(fp, &bmp);
+
+	fclose(fp);
 }
 
-void print_kernel()
+void init_kernel(Kernel* kernel, int32_t size, float sigma) 
 {
-    float norm = 0;
+    kernel->size = size;
+    kernel->data = malloc(size * size * sizeof(float));
 
-    for (int32_t y = -KERNEL_HALF; y <= KERNEL_HALF; y++)
+    int32_t half = size / 2;
+
+    float sum = 0.0f;
+
+    for (int32_t x = 0; x < size; x++) 
     {
-        for (int32_t x = -KERNEL_HALF; x <= KERNEL_HALF; x++)
+        for (int32_t y = 0; y < size; y++) 
         {
-            norm += kernel_weight(x, y);
+            float dx = (float) (x - half);
+            float dy = (float) (y - half);
+
+            float d = 1.0 - sqrtf(dx * dx + dy * dy) / half;
+            float weight = d * expf(-d * d / (2.0f * sigma * sigma));
+            weight = d > 0.0 ? weight : 0.0f;
+
+            kernel->data[y * size + x] = weight;
+            sum += weight;
         }
     }
 
-	FILE* fp = fopen("../../src/kernel.i", "w");
-	fprintf(fp, "float kernel[] = {\n");
-	for (int32_t y = -KERNEL_HALF; y <= KERNEL_HALF; y++)
-	{
-		fprintf(fp, "\t");
-		for (int32_t x = -KERNEL_HALF; x <= KERNEL_HALF; x++)
-		{
-			float weight = kernel_weight(x, y) / fabs(norm);
-			fprintf(fp, "%ff, ", weight);
-		}
-		fprintf(fp, "\n");
-	}
+    for (int32_t i = 0; i < size * size; i++) 
+    {
+        kernel->data[i] /= sum;
+    }
 
-	fprintf(fp, "};");
-	fclose(fp);
+    printf("Kernel sum: %f\n", sum);
+}
+
+void free_kernel(Kernel *kernel) 
+{
+    free(kernel->data);
 }
