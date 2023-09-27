@@ -105,6 +105,19 @@ void image32f_from_bmp(Image32f *dest, BitmapImage *src) {
 }
 
 
+void image32f_from_image8u(Image32f *dest, Image8u *src) {
+    for (uint32_t y = 0; y < src->height; y++)
+    {
+        uint32_t img_offset = (y + dest->offset) * dest->stride + dest->offset;
+        uint32_t src_offset = (y + src->offset) * src->stride + src->offset;
+
+        for (uint32_t x = 0; x < src->width; x++) {
+            dest->data[img_offset + x] = (float) src->data[src_offset + x] / 255.0f;
+        }
+    }
+}
+
+
 void image8u_from_image32f(Image8u *dest, Image32f *src) {
     for (uint32_t y = 0; y < src->height; y++)
     {

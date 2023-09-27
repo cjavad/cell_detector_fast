@@ -77,6 +77,7 @@ __attribute__((always_inline)) inline void image32f_set_pixel(Image32f *image, i
 
 void image1u_from_image32f(Image1u *dest, Image32f *src, float threshold);
 void image8u_from_image32f(Image8u *dest, Image32f *src);
+void image32f_from_image8u(Image32f *dest, Image8u *src);
 void image32f_from_bmp(Image32f *dest, BitmapImage *src);
 void image8u_to_bmp(BitmapImage *dest, Image8u *src);
 void image32f_to_bmp(BitmapImage *dest, Image32f *src);
