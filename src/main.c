@@ -37,7 +37,27 @@ char* output = NULL;
 
 uint32_t cccount = 0;
 
+void grad_process(BitmapImage* image) {
+    Kernel gaussian;
+    init_gaussian_kernel(&gaussian, 9, 3);
+
+    Image32f in, out;
+    Image32f* in_ptr = &in;
+    Image32f* out_ptr = &out;
+
+    init_image32f(&in, image->bitmap.width, image->bitmap.height, 32);
+    init_image32f(&out, image->bitmap.width, image->bitmap.height, 32);
+    image32f_from_bmp(&in, image);
+
+    kernel_pass(out_ptr, in_ptr, &gaussian);
+    gen_grad(out_ptr, image);   
+}
+
 void process_bitmap(BitmapImage *image) {
+    grad_process(image);
+    return;
+
+
     point_list_t results;
     point_list_t whites;
     point_list_t edges;

@@ -31,7 +31,7 @@ void calc_grad(float* dx, float* dy, Image32f* image, int32_t x, int32_t y)
 }
 
 
-void gen_grad(Image32f* image, int id)
+void gen_grad(Image32f* image, BitmapImage* out)
 {
 	BitmapImage img;
 	init_bitmap(&img, image->width, image->height);
@@ -120,17 +120,15 @@ void gen_grad(Image32f* image, int id)
 	{
 		point_t p = results.data[i];
 
-
-
-		draw_cross(&img.bitmap, p.x, p.y, 0, 0, 255);
+		draw_cross(&out->bitmap, p.x, p.y, 0, 0, 255);
 	}
 
 	char buff[512];
-	sprintf(buff, "res/grad_%i.bmp", id);
+	// sprintf(buff, "res/grad_%i.bmp", id);
 
-	FILE* fp = fopen(buff, "wb");
-	write_bitmap(fp, &img);
-	fclose(fp);
+	// FILE* fp = fopen(buff, "wb");
+	// write_bitmap(fp, &img);
+	// fclose(fp);
 
 	free_bitmap(&img);
 }
