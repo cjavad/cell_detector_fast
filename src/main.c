@@ -147,8 +147,8 @@ void peekpoints(point_list_t* cells, Image8u* buffer_ptr) {
 }
 
 
-void grade() {
-
+void grade(point_list_t* cells, Image32f* image) {
+    gen_grad(image, cells);
 }
 
 void process_bitmap(BitmapImage *image) {
@@ -175,10 +175,6 @@ void process_bitmap(BitmapImage *image) {
         }
     }
 
-    gen_grad(in_ptr, cccount++);
-
-    return;
-
     destroy_image32f(out_ptr);
 
     Image8u grayscale, buffer;
@@ -190,7 +186,6 @@ void process_bitmap(BitmapImage *image) {
     init_image8u(buffer_ptr, image->bitmap.width, image->bitmap.height, 32);
 
     image8u_from_image32f(buffer_ptr, in_ptr);
-    destroy_image32f(in_ptr);
 
     switch (method) {
         case METHOD_ERODE:
@@ -200,18 +195,20 @@ void process_bitmap(BitmapImage *image) {
             peekpoints(&cells, buffer_ptr);
             break;
         case METHOD_GRADE:
-            grade();
+            grade(&cells, in_ptr);
             break;
         default:
             printf("Warning: No method selected (Use -m or --method)\n");
             break;
     }
 
+    destroy_image32f(in_ptr);
+
     for (uint32_t i = 0; i < cells.len; i++) {
         uint32_t x = cells.data[i].x;
         uint32_t y = cells.data[i].y;
 
-        draw_cross(&image->bitmap, x, y, 255, 0, 0, 70);
+        draw_cross(&image->bitmap, x, y, 255, 0, 0, method == METHOD_GRADE ? 0 : 70);
     }
 
     

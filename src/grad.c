@@ -31,7 +31,7 @@ void calc_grad(float* dx, float* dy, Image32f* image, int32_t x, int32_t y)
 }
 
 
-void gen_grad(Image32f* image, BitmapImage* out)
+void gen_grad(Image32f* image, point_list_t* cells)
 {
 	BitmapImage img;
 	init_bitmap(&img, image->width, image->height);
@@ -63,9 +63,6 @@ void gen_grad(Image32f* image, BitmapImage* out)
 
 	Image8u mask;
 	init_image8u(&mask, image->width, image->height, 32);
-
-	point_list_t results;
-	vec_init(&results);
 
 	#define CUT 0.08f
 	#define RADIUS 16
@@ -102,7 +99,7 @@ void gen_grad(Image32f* image, BitmapImage* out)
 
 		if (fail) continue;
 
-		vec_push(&results, ((point_t){gp.x, gp.y}));
+		vec_push(cells, ((point_t){gp.x, gp.y}));
 
 		for (int32_t y = -RADIUS; y < RADIUS + 1; y++)
 		{
@@ -113,22 +110,6 @@ void gen_grad(Image32f* image, BitmapImage* out)
 			}
 		}
 	}
-
-	printf("found %u cells\n", results.len);
-
-	for (uint32_t i = 0; i < results.len; i++)
-	{
-		point_t p = results.data[i];
-
-		draw_cross(&out->bitmap, p.x, p.y, 0, 0, 255);
-	}
-
-	char buff[512];
-	// sprintf(buff, "res/grad_%i.bmp", id);
-
-	// FILE* fp = fopen(buff, "wb");
-	// write_bitmap(fp, &img);
-	// fclose(fp);
 
 	free_bitmap(&img);
 }
