@@ -17,6 +17,7 @@
 #include "kernel.h"
 
 #include "fft.h"
+#include "swizle.h"
 #include "vec.h"
 
 uint32_t mode = 0;
@@ -32,6 +33,14 @@ char* input = NULL;
 char* output = NULL;
 
 void process_bitmap(BitmapImage *image) {
+    point_list_t whites;
+    point_list_t edges;
+
+    vec_init(&whites);
+    vec_init(&edges);
+
+    swizle_ma_jizle(&whites, &edges, &image->bitmap, 88);
+
     Image32f in, out;
     Image32f* in_ptr = &in;
     Image32f* out_ptr = &out;
@@ -61,6 +70,8 @@ void process_bitmap(BitmapImage *image) {
     destroy_image32f(in_ptr);
 
     image8u_to_bmp(image, &grayscale);
+
+
 
     /*
 

@@ -1,6 +1,9 @@
 #include "swizle.h"
 #include <stdint.h>
 
+/**
+*  Swizle ma jizle for them edges (and whites)
+*/
 void swizle_ma_jizle(point_list_t* whites, point_list_t* edges, BitmapData* bmp, uint32_t thold)
 {
 	for (uint32_t y = 0; y < bmp->height; y++)
