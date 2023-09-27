@@ -115,9 +115,10 @@ void destroy_bitmap(BitmapImage* image) {
 }
 
 
-#define CROSS_SIZE 5
+#define CROSS_SIZE 9
+#define CROSS_THICKNESS 2
 
-void draw_cross(BitmapData *bmp, uint32_t x, uint32_t y, uint8_t r, uint8_t g, uint8_t b, uint8_t thold) {
+uint32_t draw_cross(BitmapData *bmp, uint32_t x, uint32_t y, uint8_t r, uint8_t g, uint8_t b, uint8_t thold) {
     if (
         bmp_get_pixel_secure(bmp, x + 0, y, 0) < thold ||
         bmp_get_pixel_secure(bmp, x + 1, y, 0) < thold ||
@@ -125,16 +126,24 @@ void draw_cross(BitmapData *bmp, uint32_t x, uint32_t y, uint8_t r, uint8_t g, u
         bmp_get_pixel_secure(bmp, x, y + 1, 0) < thold ||
         bmp_get_pixel_secure(bmp, x, y - 1, 0) < thold
     
-    ) return;
+    ) return 0;
 
     printf("Cell at (%i, %i)\n", x, y);
 
     for (uint32_t i = 0; i < CROSS_SIZE; i++) {
-        bmp_set_pixels(bmp, x + i, y, r, g, b);
-        bmp_set_pixels(bmp, x - i, y, r, g, b);
-        bmp_set_pixels(bmp, x, y + i, r, g, b);
-        bmp_set_pixels(bmp, x, y - i, r, g, b);
+        for (uint32_t j = 0; j < CROSS_THICKNESS; j++) {
+            bmp_set_pixels(bmp, x + i, y + j, r, g, b);
+            bmp_set_pixels(bmp, x + i, y - j, r, g, b);
+            bmp_set_pixels(bmp, x - i, y + j, r, g, b);
+            bmp_set_pixels(bmp, x - i, y - j, r, g, b);
+            bmp_set_pixels(bmp, x + j, y + i, r, g, b);
+            bmp_set_pixels(bmp, x - j, y + i, r, g, b);
+            bmp_set_pixels(bmp, x + j, y - i, r, g, b);
+            bmp_set_pixels(bmp, x - j, y - i, r, g, b);
+        }
     }
 
     bmp_set_pixels(bmp, x, y, 255, 0, 0);
+
+    return 1;
 }

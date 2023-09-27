@@ -107,9 +107,6 @@ void gen_grad(Image32f* image, point_list_t* cells)
 	BitmapImage img;
 	init_bitmap(&img, image->width, image->height);
 
-	point_list_t points;
-	vec_init(&points);
-
 	grad_point_list_t gpoints;
 	vec_init(&gpoints);
 
@@ -127,7 +124,6 @@ void gen_grad(Image32f* image, point_list_t* cells)
 			float g = ((dy * 127.0f) + 128.0f);
 			bmp_set_pixels(&img.bitmap, x, y, (uint8_t)r, (uint8_t)g, 0);
 
-			vec_push(&points, ((point_t){x, y}));
 			vec_push(&gpoints, ((grad_point_t){x, y, dx, dy}));
 		}
 	}
@@ -191,6 +187,8 @@ void gen_grad(Image32f* image, point_list_t* cells)
 
 
 	free_bitmap(&img);
+    destroy_image8u(&mask);
+    vec_free(&gpoints);
 }
 
 void find_grad(grad_point_t* p, BitmapData* input, int32_t x, int32_t y)

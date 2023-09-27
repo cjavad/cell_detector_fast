@@ -1,4 +1,4 @@
-#pragma once
+/*#pragma once
 
 #include <stdint.h>
 
@@ -6,3 +6,4 @@
 
 void krad_kgen();
 void krad_pass(BitmapData* outbmp);
+*/

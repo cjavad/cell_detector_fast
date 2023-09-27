@@ -1,4 +1,4 @@
-#include "krad.h"
+/*#include "krad.h"
 
 #include "bitmap.h"
 #include "grayscale.h"
@@ -152,4 +152,4 @@ void krad_edge_pass(GrayScale* dest, GrayScale* src, const PixelList* const pixe
 
 		dest->data[y * src->height + x] = average < 0 ? 0 : average > 255 ? 255 : average;
 	}
-}
+}*/

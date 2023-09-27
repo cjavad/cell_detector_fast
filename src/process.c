@@ -6,7 +6,7 @@
 #include <stdio.h>
 #include <string.h>
 
-
+/*
 #define max(a, b) ((a) > (b) ? (a) : (b))
 #define min(a, b) ((a) < (b) ? (a) : (b))
 #define swap(a, b) {void* swap_temp = a; a = b; b = swap_temp;}
@@ -269,3 +269,4 @@ void detect_cell(BitmapData* bmp, GrayScale* image, int32_t cx, int32_t cy)
         draw_cross(bmp, cx, cy, 255, 0, 0, 70);
     }
 }
+*/
