@@ -23,13 +23,42 @@
 
 #include "grad.h"
 
+
+#define OPT_DEFAULT 0
+#define OPT_HELP 1
+#define OPT_SAMPLE_TYPE 2
+#define OPT_KERNEL 3
+#define OPT_KERNEL_SIZE 4
+#define OPT_KERNEL_ARG 5
+#define OPT_KERNEL_ARG2 6
+#define OPT_INPUT 7
+#define OPT_OUTPUT 8
+#define OPT_PASS_DIR 9
+#define OPT_METHOD 10
+
 uint32_t mode = 0;
 
 Vec(Kernel) kernels;
+
+#define KERNEL_TYPE_NONE 0
+#define KERNEL_TYPE_GAUSSIAN 1
+#define KERNEL_TYPE_LAPLACIAN 2
+#define KERNEL_TYPE_LOG 3
+#define KERNEL_TYPE_DOG 4
+
 uint32_t kernel_type = 0;
 uint32_t kernel_size = 0;
 float kernel_arg = 0;
 float kernel_arg2 = 0;
+
+#define METHOD_NONE 0
+#define METHOD_ERODE 1
+#define METHOD_PEEKPOINTS 2
+#define METHOD_GRADE 3
+
+uint32_t method = 0;
+
+// See sample types in samples.h
 uint32_t sample_type = EASY;
 char* pass_dir = NULL;
 char* input = NULL;
@@ -55,7 +84,6 @@ void erode(point_list_t* cells, BitmapImage* image, Image8u* grayscale_ptr, Imag
 
     FILE* fp;
     char buff[512];
-
 
     for (uint32_t i = 0; whites.len > 0; i++) {
         printf("Pixel list len: %d\n", whites.len);
@@ -159,9 +187,20 @@ void process_bitmap(BitmapImage *image) {
 
     image8u_from_image32f(buffer_ptr, in_ptr);
     destroy_image32f(in_ptr);
-
-    // erode(&cells, image, grayscale_ptr, buffer_ptr);
-    // peekpoints(&cells, buffer_ptr);
+    
+    switch (method) {
+        case METHOD_ERODE:
+            erode(&cells, image, grayscale_ptr, buffer_ptr);
+            break;
+        case METHOD_PEEKPOINTS:
+            peekpoints(&cells, buffer_ptr);
+            break;
+        case METHOD_GRADE:
+            grade();
+            break;
+        default:
+            break;
+    }
 
     for (uint32_t i = 0; i < cells.len; i++) {
         uint32_t x = cells.data[i].x;
@@ -214,35 +253,24 @@ void process_single() {
     fclose(fp);
 }
 
-#define OPT_DEFAULT 0
-#define OPT_HELP 1
-#define OPT_SAMPLE_TYPE 2
-#define OPT_KERNEL 3
-#define OPT_KERNEL_SIZE 4
-#define OPT_KERNEL_ARG 5
-#define OPT_KERNEL_ARG2 6
-#define OPT_INPUT 7
-#define OPT_OUTPUT 8
-#define OPT_PASS_DIR 9
-
 void create_kernel() {
     // Initialize kernel
     Kernel kernel;
     
     switch (kernel_type) {
-        case 1:
+        case KERNEL_TYPE_GAUSSIAN:
             printf("Initializing gaussian kernel with size: %d sigma: %f\n", kernel_size, kernel_arg);
             init_gaussian_kernel(&kernel, kernel_size, kernel_arg);
             break;
-        case 2:
+        case KERNEL_TYPE_LAPLACIAN:
             printf("Initializing laplacian kernel with size: %d and scale: %f\n", kernel_size, kernel_arg);
             init_laplacian_kernel(&kernel, kernel_size, kernel_arg);
             break;
-        case 3:
+        case KERNEL_TYPE_LOG:
             printf("Initializing LoG with size: %d sigma: %f and scale %f\n", kernel_size, kernel_arg, kernel_arg2);
             init_log_kernel(&kernel, kernel_size, kernel_arg, kernel_arg2);
             break;
-        case 4:
+        case KERNEL_TYPE_DOG:
             printf("Initializing DoG with size: %d sigma1: %f and sigma2: %f\n", kernel_size, kernel_arg, kernel_arg2);
             init_dog_kernel(&kernel, kernel_size, kernel_arg, kernel_arg2);
             break;
@@ -316,6 +344,12 @@ int32_t main(int argc, char** argv)
             continue;
         }
 
+        if (mode == OPT_METHOD) {
+            method = atoi(argv[i]);
+            mode = OPT_DEFAULT;
+            continue;
+        }
+
         if (strcmp(argv[i], "-h") == 0 || strcmp(argv[i], "--help") == 0) {
             mode = OPT_HELP;
             break;
@@ -346,6 +380,11 @@ int32_t main(int argc, char** argv)
             continue;
         }
 
+        if (strcmp(argv[i], "-m") == 0 || strcmp(argv[i], "--method") == 0) {
+            mode = OPT_METHOD;
+            continue;
+        }
+
         if (strcmp(argv[i], "-i") == 0 || strcmp(argv[i], "--input") == 0) {
             mode = OPT_INPUT;
             continue;
@@ -373,6 +412,8 @@ int32_t main(int argc, char** argv)
         printf("  -k --kernel\t Set kernel type\n");
         printf("  -z --kernel-size\t Set kernel size\n");
         printf("  -a --kernel-arg\t Set kernel argument\n");
+        printf("  -b --kernel-arg2\t Set kernel argument 2\n");
+        printf("  -m --method\t Set method\n");
         printf("  -i --input\t Set input file\n");
         printf("  -o --output\t Set output file\n");
         printf("  -p --pass-dir\t Set pass directory\n");
@@ -391,6 +432,13 @@ int32_t main(int argc, char** argv)
         printf("  2\t LAPLACIAN\n");
         printf("  3\t LoG\n");
         printf("  4\t DoG\n");
+
+        // Print method types
+        printf("Method types:\n");
+        printf("  0\t NONE\n");
+        printf("  1\t ERODE\n");
+        printf("  2\t PEEKPOINTS\n");
+        printf("  3\t GRADE\n");
 
         return 0;
     }
