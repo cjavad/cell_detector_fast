@@ -21,6 +21,8 @@
 #include "swizle.h"
 #include "vec.h"
 
+#include "grad.h"
+
 uint32_t mode = 0;
 
 Vec(Kernel) kernels;
@@ -32,6 +34,8 @@ uint32_t sample_type = EASY;
 char* pass_dir = NULL;
 char* input = NULL;
 char* output = NULL;
+
+uint32_t cccount = 0;
 
 void process_bitmap(BitmapImage *image) {
     point_list_t results;
@@ -51,6 +55,8 @@ void process_bitmap(BitmapImage *image) {
     init_image32f(&in, image->bitmap.width, image->bitmap.height, 32);
     init_image32f(&out, image->bitmap.width, image->bitmap.height, 32);
     image32f_from_bmp(&in, image);
+
+    gen_grad(&in, cccount++);
 
     for (uint32_t i = 0; i < kernels.len; i++) {
         kernel_pass(out_ptr, in_ptr, &kernels.data[i]);
