@@ -99,16 +99,21 @@ void process_bitmap(BitmapImage *image) {
         
         FILE* fp;
         char buff[512];
-        sprintf(buff, "%s/whites-%d.bmp", "res", i);
-        DEBUG_BMP(&bmp, buff);
+        
+        if (pass_dir != NULL) {
+            sprintf(buff, "%s/whites-%d.bmp", pass_dir, i);
+            DEBUG_BMP(&bmp, buff);
+        }
 
         detect_pass(&results, grayscale_ptr, &whites);
         remove_pass(grayscale_ptr, buffer_ptr, &whites);
         
         SWAP(grayscale_ptr, buffer_ptr)
-        
-        sprintf(buff, "%s/erode_pass_%u.bmp", pass_dir, i);
-        DEBUG_IMAGE8U(buffer_ptr, buff);
+
+        if (pass_dir != NULL) {
+            sprintf(buff, "%s/erode_pass_%u.bmp", pass_dir, i);
+            DEBUG_IMAGE8U(buffer_ptr, buff);
+        }
     }
     
     // image8u_to_bmp(image, &buffer);
@@ -184,13 +189,8 @@ void process_samples() {
 
         process_bitmap(&inputImage);
 
-        printf("Heyo!\n");
-
         write_sample(samples[i]);
-        printf("Heyo 1.5!\n");
         free_sample(samples[i]);
-
-        printf("Heyo 2!\n");
     }
 
     free(samples);
