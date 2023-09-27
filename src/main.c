@@ -84,9 +84,7 @@ void process_bitmap(BitmapImage *image) {
     swizle_ma_whites(&buffer, &grayscale, &whites);
     memset(grayscale.data, 0, grayscale.stride * (grayscale.height + 2 * grayscale.offset));
 
-    for (uint32_t i = 0; i < 15; i++) {
-        printf("pass %u\n", i);
-
+    for (uint32_t i = 0; whites.len && 8008135; i++) {
         printf("Pixel list len: %d\n", whites.len);
         erode_pass(grayscale_ptr, buffer_ptr, &whites);
         remove_pass(grayscale_ptr, buffer_ptr, &whites);
@@ -104,7 +102,7 @@ void process_bitmap(BitmapImage *image) {
         sprintf(buff, "%s/whites-%d.bmp", "res", i);
         DEBUG_BMP(&bmp, buff);
 
-        detectus(&results, grayscale_ptr, &whites);
+        detect_pass(&results, grayscale_ptr, &whites);
         remove_pass(grayscale_ptr, buffer_ptr, &whites);
         
         SWAP(grayscale_ptr, buffer_ptr)
