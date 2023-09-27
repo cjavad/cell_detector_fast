@@ -34,7 +34,7 @@ void resolve_output_path(char* output, uint8_t sample_type, char* sample_name) {
 }
 
 void get_samples(sample_t*** samples, uint32_t* count, uint8_t sample_type) {
-    char* path = malloc(512);
+    char path[512];
 
     resolve_sample_path(path, sample_type, NULL);
     
@@ -93,11 +93,10 @@ void get_samples(sample_t*** samples, uint32_t* count, uint8_t sample_type) {
     }
 
     closedir(d);
-    free(path);
 }
 
 void write_sample(sample_t *sample) {
-    char* path = malloc(512);
+    char path[512];
     
     resolve_output_path(path, sample->sample_type, sample->sample_name);
 
@@ -105,7 +104,6 @@ void write_sample(sample_t *sample) {
     write_bitmap(fp, sample->output_bmp);
 
     fclose(fp);
-    free(path);
 }
 
 void write_samples(sample_t **samples, uint32_t count) {
