@@ -95,8 +95,6 @@ uint32_t calc_grad2(BitmapImage* img, int32_t x, int32_t y)
 	float gxdy = lrdy + trdy * 0.707f - tldy * 0.707f;
 	float gydy = btdy + trdy * 0.707f + tldy * 0.707f;
 
-	printf("x = %u, y = %u, ddx = %f, ddy = %f\n", x, y, gxdx, gydy);
-
 	if (gxdx * gydy >= 0) return 0;
 	return 1; 
 }
