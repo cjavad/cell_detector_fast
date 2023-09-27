@@ -191,7 +191,7 @@ void process_bitmap(BitmapImage *image) {
 
     image8u_from_image32f(buffer_ptr, in_ptr);
     destroy_image32f(in_ptr);
-    
+
     switch (method) {
         case METHOD_ERODE:
             erode(&cells, image, grayscale_ptr, buffer_ptr);
@@ -203,6 +203,7 @@ void process_bitmap(BitmapImage *image) {
             grade();
             break;
         default:
+            printf("Warning: No method selected (Use -m or --method)\n");
             break;
     }
 
@@ -454,6 +455,44 @@ int32_t main(int argc, char** argv)
     
     if (!S_ISDIR(stat(pass_dir, &st) == 0 ? st.st_mode : 0)) {
         mkdir(pass_dir, 0777);
+    }
+
+    // If kernels are empty set defauls based on method
+    if (kernels.len == 0) {
+        switch (method) {
+            case METHOD_ERODE:
+                kernel_type = KERNEL_TYPE_GAUSSIAN;
+                kernel_size = 14;
+                kernel_arg = 3.0f;
+                create_kernel();
+
+                kernel_type = KERNEL_TYPE_LOG;
+                kernel_size = 9;
+                kernel_arg = 1.1f;
+                kernel_arg2 = 100.0f;
+                create_kernel();
+                break;
+            case METHOD_PEEKPOINTS:
+            //  -k 1 -z 7 -a 4 -k 2 -z 21 -a 1
+                kernel_type = KERNEL_TYPE_GAUSSIAN;
+                kernel_size = 7;
+                kernel_arg = 4.0f;
+                create_kernel();
+
+                kernel_type = KERNEL_TYPE_LAPLACIAN;
+                kernel_size = 21;
+                kernel_arg = 1.0f;
+                kernel_arg2 = 1.0f;
+                create_kernel();
+                break;
+            case METHOD_GRADE:
+                kernel_type = KERNEL_TYPE_GAUSSIAN;
+                kernel_size = 9;
+                kernel_arg = 3.0f;
+                create_kernel();
+            default:
+                break;
+        }
     }
 
     if (input == NULL ^ output == NULL) {
