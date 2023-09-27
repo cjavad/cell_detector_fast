@@ -116,7 +116,7 @@ void destroy_bitmap(BitmapImage* image) {
 
 
 #define CROSS_SIZE 5
-#define THRESHOLD 70
+#define THRESHOLD 0
 
 void draw_cross(BitmapData *bmp, uint32_t x, uint32_t y, uint8_t r, uint8_t g, uint8_t b) {
     if (
