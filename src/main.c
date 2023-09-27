@@ -64,6 +64,11 @@ char* pass_dir = NULL;
 char* input = NULL;
 char* output = NULL;
 
+
+// Global variables for debugging
+FILE* fp;
+char buff[512];
+
 void erode(point_list_t* cells, BitmapImage* image, Image8u* grayscale_ptr, Image8u* buffer_ptr) {
     point_list_t results;
     point_list_t whites;
@@ -75,15 +80,11 @@ void erode(point_list_t* cells, BitmapImage* image, Image8u* grayscale_ptr, Imag
 
     swizle_ma_jizle(&whites, &edges, &image->bitmap, 88);
 
-    ///*
     swizle_ma_edges(grayscale_ptr, buffer_ptr, &edges, 60);
     memset(buffer_ptr->data, 0, buffer_ptr->stride * (buffer_ptr->height + 2 * buffer_ptr->offset));
 
     swizle_ma_whites(buffer_ptr, grayscale_ptr, &whites);
     memset(grayscale_ptr->data, 0, grayscale_ptr->stride * (grayscale_ptr->height + 2 * grayscale_ptr->offset));
-
-    FILE* fp;
-    char buff[512];
 
     for (uint32_t i = 0; whites.len > 0; i++) {
         printf("Pixel list len: %d\n", whites.len);
@@ -161,6 +162,7 @@ void process_bitmap(BitmapImage *image) {
 
     init_image32f(&in, image->bitmap.width, image->bitmap.height, 32);
     init_image32f(&out, image->bitmap.width, image->bitmap.height, 32);
+
     image32f_from_bmp(&in, image);
 
     for (uint32_t i = 0; i < kernels.len; i++) {
@@ -182,10 +184,15 @@ void process_bitmap(BitmapImage *image) {
     Image8u* grayscale_ptr = &grayscale;
     Image8u* buffer_ptr = &buffer;
 
-    init_image8u(grayscale_ptr, image->bitmap.width, image->bitmap.height, 32);
     init_image8u(buffer_ptr, image->bitmap.width, image->bitmap.height, 32);
 
     image8u_from_image32f(buffer_ptr, in_ptr);
+
+    if (method != METHOD_GRADE) {
+        destroy_image32f(in_ptr);
+    }
+
+    init_image8u(grayscale_ptr, image->bitmap.width, image->bitmap.height, 32);
 
     switch (method) {
         case METHOD_ERODE:
@@ -196,13 +203,16 @@ void process_bitmap(BitmapImage *image) {
             break;
         case METHOD_GRADE:
             grade(&cells, in_ptr);
+            destroy_image32f(in_ptr);
             break;
         default:
             printf("Warning: No method selected (Use -m or --method)\n");
             break;
     }
 
-    destroy_image32f(in_ptr);
+    destroy_image8u(&grayscale);
+    destroy_image8u(&buffer);
+
     uint32_t count = 0;
 
     for (uint32_t i = 0; i < cells.len; i++) {
@@ -214,8 +224,6 @@ void process_bitmap(BitmapImage *image) {
 
     printf("Found %u cells\n", count);
     
-    destroy_image8u(&grayscale);
-    destroy_image8u(&buffer);
 }
 
 void process_samples() {

@@ -1,4 +1,4 @@
-#pragma once
+/*#pragma once
 
 #include <stdint.h>
 
@@ -6,3 +6,4 @@
 #include "grayscale.h"
 
 void mark_cells(BitmapData* outbmp);
+*/
