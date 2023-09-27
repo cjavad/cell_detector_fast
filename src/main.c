@@ -470,20 +470,19 @@ int32_t main(int argc, char** argv)
             case METHOD_ERODE:
                 kernel_type = KERNEL_TYPE_GAUSSIAN;
                 kernel_size = 14;
-                kernel_arg = 3.0f;
+                kernel_arg = 3.3f;
                 create_kernel();
 
                 kernel_type = KERNEL_TYPE_LOG;
                 kernel_size = 9;
-                kernel_arg = 1.1f;
+                kernel_arg = 0.9f;
                 kernel_arg2 = 100.0f;
                 create_kernel();
                 break;
             case METHOD_PEEKPOINTS:
-            //  -k 1 -z 7 -a 4 -k 2 -z 21 -a 1
                 kernel_type = KERNEL_TYPE_GAUSSIAN;
-                kernel_size = 7;
-                kernel_arg = 4.0f;
+                kernel_size = 11;
+                kernel_arg = 3.3f;
                 create_kernel();
 
                 kernel_type = KERNEL_TYPE_LAPLACIAN;
