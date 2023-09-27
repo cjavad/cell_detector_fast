@@ -20,7 +20,7 @@ typedef struct {
 } Image32f;
 
 #define SWAP(a, b) {void* swap_temp = a; a = b; b = swap_temp;}
-#define IMAGE_GET_OFFSET(image, x, y) (((image)->offset + y) * (image)->stride + (image)->offset + x)
+#define IMAGE_GET_OFFSET(image, x, y) (((image)->offset + (y)) * (image)->stride + (image)->offset + (x))
 
 void init_image8u(Image8u *image, uint32_t width, uint32_t height, uint32_t offset);
 void destroy_image8u(Image8u *image);

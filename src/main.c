@@ -62,7 +62,7 @@ void process_bitmap(BitmapImage *image) {
             sprintf(buff, "%s/kernel_pass_%u.bmp", pass_dir, i);
             DEBUG_IMAGE32F(in_ptr, buff);
         }
-    } 
+    }
 
     destroy_image32f(out_ptr);
 
@@ -85,6 +85,8 @@ void process_bitmap(BitmapImage *image) {
     memset(grayscale.data, 0, grayscale.stride * (grayscale.height + 2 * grayscale.offset));
 
     for (uint32_t i = 0; i < 15; i++) {
+        printf("pass %u\n", i);
+
         printf("Pixel list len: %d\n", whites.len);
         erode_pass(grayscale_ptr, buffer_ptr, &whites);
         remove_pass(grayscale_ptr, buffer_ptr, &whites);
@@ -99,10 +101,10 @@ void process_bitmap(BitmapImage *image) {
         
         FILE* fp;
         char buff[512];
-        sprintf(buff, "%s/whites-%d.bmp", "./res", i);
+        sprintf(buff, "%s/whites-%d.bmp", "res", i);
         DEBUG_BMP(&bmp, buff);
 
-        detect_pass(&results, grayscale_ptr, &whites);
+        detectus(&results, grayscale_ptr, &whites);
         remove_pass(grayscale_ptr, buffer_ptr, &whites);
         
         SWAP(grayscale_ptr, buffer_ptr)

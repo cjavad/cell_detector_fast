@@ -45,6 +45,72 @@ void remove_pass(Image8u *output, Image8u *input, point_list_t *pixels) {
 }
 
 #define DETECT_SIZE 11
+#define RANGE (DETECT_SIZE / 2)
+
+void detectus(point_list_t* results, Image8u* image, point_list_t* pixels) {
+    printf("Running detect pass on %u pixels\n", pixels->len);
+    for (uint32_t i = 0; i < pixels->len; i++)
+    {
+        point_t p = pixels->data[i];
+
+        {
+            uint32_t exclude = 0;
+            for (int32_t x = p.x - (RANGE + 1); x < p.x + (RANGE + 1) + 1; x++)
+            {
+                exclude += image8u_get_pixel(image, x, p.y - (RANGE + 1));
+                exclude += image8u_get_pixel(image, x, p.y + (RANGE + 1));
+            }
+
+            if (exclude) return;
+
+            for (int32_t y = p.y - (RANGE + 1); y < p.y + (RANGE + 1) + 1; y++)
+            {
+                exclude += image8u_get_pixel(image, p.x - (RANGE + 1), y);
+                exclude += image8u_get_pixel(image, p.y + (RANGE + 1), y);
+            }
+
+            if (exclude) return;
+        }
+
+        printf("Passed exclude at %i, %i\n", p.x, p.y);
+
+        {
+            uint32_t found = 0;
+
+            for (int32_t y = p.y - RANGE; y < p.y + RANGE + 1; y++)
+            {
+                for (int32_t x = p.x - RANGE; x < p.x + RANGE + 1; x++)
+                {
+                    found += image8u_get_pixel(image, x, y);
+                }
+            }
+
+            if (!found) return;
+        }
+
+        printf("Found cell at %i, %i\n", p.x, p.y);
+
+        for (int32_t y = p.y - RANGE; y < p.y + RANGE + 1; y++)
+        {
+            for (int32_t x = p.x - RANGE; x < p.x + RANGE + 1; x++)
+            {
+                image8u_set_pixel(image, x, y, 128);
+            }
+        }
+
+        for (int32_t y = p.y - RANGE; y < p.y + RANGE + 1; y++)
+        {
+            for (int32_t x = p.x - RANGE; x < p.x + RANGE + 1; x++)
+            {
+                // if (image8u_get_pixel(image, x, y)) printf("WE FUCKED\n");
+            }
+        }
+
+        printf("ceared image from %i, %i to %i, %i\n", p.x - RANGE, p.y - RANGE, p.x + RANGE, p.y + RANGE);
+
+        vec_push(results, (p));
+    }
+}
 
 void detect_pass(point_list_t* results, Image8u* image, point_list_t* pixels) {
     for (uint32_t i = 0; i < pixels->len; i++)
