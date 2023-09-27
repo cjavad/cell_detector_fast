@@ -84,6 +84,7 @@ void process_bitmap(BitmapImage *image) {
     destroy_image32f(in_ptr);
 
 
+    ///*
     swizle_ma_edges(&grayscale, &buffer, &edges, 60);
     memset(buffer.data, 0, buffer.stride * (buffer.height + 2 * buffer.offset));
 
@@ -131,13 +132,14 @@ void process_bitmap(BitmapImage *image) {
 
         draw_cross(&image->bitmap, x, y, 255, 0, 0);
     }
+    //*/
 
     /*
 
     PeakVec peaks;
     vec_init(&peaks);
 
-    find_peaks(&peaks, &img);
+    find_peaks(&peaks, buffer_ptr);
 
     printf("Found %u peaks\n", peaks.len);
 
@@ -145,10 +147,10 @@ void process_bitmap(BitmapImage *image) {
 
     for (uint32_t j = 0; j < peaks.len; j++) {
         uint32_t peak = peaks.data[j];
-        img.data[peak] = 255;
+        buffer_ptr->data[peak] = 255;
 
-        uint32_t x = peak % img.stride - img.offset;
-        uint32_t y = peak / img.stride - img.offset;
+        uint32_t x = peak % buffer_ptr->stride - buffer_ptr->offset;
+        uint32_t y = peak / buffer_ptr->stride - buffer_ptr->offset;
 
         // Draw cross here with center at x, y on top of image
         draw_cross(&image->bitmap, x, y, 255, 0, 0);
@@ -158,10 +160,10 @@ void process_bitmap(BitmapImage *image) {
         FILE* fp;
         char buff[512];
         sprintf(buff, "%s/peaks.bmp", pass_dir);
-        DEBUG_IMAGE8U(&img, buff);
+        DEBUG_IMAGE8U(buffer_ptr, buff);
 
-        sprintf(buff, "%s/debug.bmp", pass_dir);
-        DEBUG_BMP(&bmp, buff);
+        //sprintf(buff, "%s/debug.bmp", pass_dir);
+        //DEBUG_BMP(buffer_ptr, buff);
 
     }
     vec_free(&peaks);
