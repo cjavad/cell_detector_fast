@@ -1,9 +1,24 @@
 #include "image.h"
+#include "bitmap.h"
 #include <stdlib.h>
 
 #define ALIGN(x, a) (((x) + ((a) - 1)) & (~((a) - 1)))
 #define ALIGN_8(x) ALIGN(x, 8)
 #define ALIGN_32(x) ALIGN(x, 32)
+
+void init_image1u(Image1u *image, uint32_t width, uint32_t height) {
+    image->width = width;
+    image->height = height;
+    
+    // Data contains 64 bit integers (8 bytes) for 64 pixels
+    // 8 * width / 64 = width / 8
+    image->length = ALIGN_8(height * width) / 8;
+    image->data = calloc(1, image->length * sizeof(uint64_t));
+}
+
+void destroy_image1u(Image1u *image) {
+    free(image->data);
+}
 
 void init_image8u(Image8u *image, uint32_t width, uint32_t height, uint32_t offset) {
     image->width = width;
@@ -29,6 +44,34 @@ void destroy_image32f(Image32f *image) {
     free(image->data);
 }
 
+
+void image1u_from_image32f(Image1u *dest, Image32f *src, float threshold) {
+    for (uint32_t y = 0; y < src->height; y++)
+    {
+        for (uint32_t x = 0; x < src->width; x++)
+        {
+            image1u_set_pixel(dest, x, y, image32f_get_pixel(src, x, y) > threshold);
+        }
+    }
+}
+
+void image1u_to_bmp(BitmapImage *bmp, Image1u *image) {
+    for (uint32_t y = 0; y < image->height; y++)
+    {
+
+        for (uint32_t x = 0; x < image->width; x++)
+        {
+            bmp_set_pixels(
+                &bmp->bitmap,
+                x,
+                y,
+                image1u_get_pixel(image, x, y) * 255,
+                image1u_get_pixel(image, x, y) * 255,
+                image1u_get_pixel(image, x, y) * 255
+            );
+        }
+    }
+}
 
 void image32f_to_bitmap(Image32f* image, BitmapData* bmp) {
     for (uint32_t y = 0; y < image->height; y++)
@@ -126,6 +169,14 @@ void write_image8u(FILE* fp, Image8u *image) {
     BitmapImage bmp;
     init_bitmap(&bmp, image->height, image->width);
     image8u_to_bmp(&bmp, image);
+    write_bitmap(fp, &bmp);
+    free_bitmap(&bmp);
+}
+
+void write_image1u(FILE* fp, Image1u *image) {
+    BitmapImage bmp;
+    init_bitmap(&bmp, image->height, image->width);
+    image1u_to_bmp(&bmp, image);
     write_bitmap(fp, &bmp);
     free_bitmap(&bmp);
 }

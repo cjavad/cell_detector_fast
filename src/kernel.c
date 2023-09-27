@@ -183,8 +183,6 @@ void init_log_kernel(Kernel *kernel, int32_t size, float sigma, float scale)
             kernel->data[y * size + x] = scale * (-1.0f / (M_PI * sigma * sigma * sigma * sigma)) * (1.0f - (d / t)) * expf(-d / t);
         }
     }
-
-    print_kernel(kernel);
 }
 
 void free_kernel(Kernel *kernel) 
