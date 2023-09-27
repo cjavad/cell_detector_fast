@@ -77,8 +77,8 @@ void init_bitmap(BitmapImage* bmp, uint32_t width, uint32_t height)
 }
 
 void bmp_filter(BitmapData *bmp, uint32_t threshold) {
-    for (int y = 0; y < bmp->height; y++) {
-        for (int x = 0; x < bmp->width; x++) {
+    for (uint32_t y = 0; y < bmp->height; y++) {
+        for (uint32_t x = 0; x < bmp->width; x++) {
             uint32_t offset = bmp_get_pixel_offset(bmp, x, y);
             uint8_t r = bmp->data[offset + 0];
             uint8_t g = bmp->data[offset + 1];

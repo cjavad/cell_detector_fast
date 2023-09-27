@@ -89,7 +89,7 @@ void mark_cells(BitmapData* outbmp)
     FILE* fp = fopen("res/pass0.bmp", "wb");
     write_grayscale(fp, image);
     fclose(fp);
-    int pc = 1;
+    uint32_t pc = 1;
 #endif
 
 	while (whites.count) {

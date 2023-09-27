@@ -19,14 +19,14 @@
 #include "fft.h"
 #include "vec.h"
 
-int mode = 0;
+uint32_t mode = 0;
 
 Vec(Kernel) kernels;
-int kernel_type = 0;
-int kernel_size = 0;
+uint32_t kernel_type = 0;
+uint32_t kernel_size = 0;
 float kernel_arg = 0;
 float kernel_arg2 = 0;
-int sample_type = EASY;
+uint32_t sample_type = EASY;
 char* pass_dir = NULL;
 char* input = NULL;
 char* output = NULL;
@@ -107,7 +107,7 @@ void process_samples() {
 
     get_samples(&samples, &sample_count, sample_type); 
 
-    for (int i = 0; i < sample_count; i++) {
+    for (uint32_t i = 0; i < sample_count; i++) {
         char* name = samples[i]->sample_name;
         printf("Processing sample %s\n", name);
 ;
@@ -164,7 +164,7 @@ void create_kernel() {
             init_laplacian_kernel(&kernel, kernel_size);
             break;
         case 3:
-            printf("Initializing LoG with size: %d\n", kernel_size);
+            printf("Initializing LoG with size: %d sigma: %f and scale %f\n", kernel_size, kernel_arg, kernel_arg2);
             init_log_kernel(&kernel, kernel_size, kernel_arg, kernel_arg2);
             break;
         default:
@@ -187,7 +187,7 @@ int32_t main(int argc, char** argv)
 {
     vec_init(&kernels);
     
-    for (int i = 0; i < argc; i++) {
+    for (uint32_t i = 0; i < argc; i++) {
         if (mode == OPT_SAMPLE_TYPE) {
             sample_type = atoi(argv[i]);
             mode = OPT_DEFAULT;
@@ -335,7 +335,7 @@ int32_t main(int argc, char** argv)
     }
 
     // Free kernels
-    for (int i = 0; i < kernels.len; i++) {
+    for (uint32_t i = 0; i < kernels.len; i++) {
         free_kernel(&kernels.data[i]);
     }
 

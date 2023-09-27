@@ -68,8 +68,8 @@ void remove_peak(Image8u* img, uint32_t x, uint32_t y)
 
     vec_push(&indices, IMAGE_GET_OFFSET(img, x, y));
 
-    int cx = x;
-    int cy = y;
+    int32_t cx = x;
+    int32_t cy = y;
 
     while (indices.len > 0) {
         uint32_t index = vec_pop(&indices);
