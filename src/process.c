@@ -22,7 +22,6 @@ typedef struct {
 
 void filter(GrayScale* output, GrayScale* input, PixelList* pixels, uint8_t thold);
 void remove_black_pixels(GrayScale* image, GrayScale* buffer, PixelList* pixels);
-void detect_pass(BitmapData* outbmp, GrayScale* image, PixelList* pixels);
 
 #include <stdlib.h>
 
@@ -181,7 +180,7 @@ void erode_passnt(GrayScale* output, GrayScale* input, PixelList* pixels)
 
 void detect_cell(BitmapData* bmp, GrayScale* input,int32_t cx, int32_t cy);
 
-void detect_pass(BitmapData* outbmp, GrayScale* image, PixelList* pixels)
+void detect_passnt(BitmapData* outbmp, GrayScale* image, PixelList* pixels)
 {
 	for (uint32_t i = 0; i < pixels->count; i++)
 	{

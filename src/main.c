@@ -34,9 +34,11 @@ char* input = NULL;
 char* output = NULL;
 
 void process_bitmap(BitmapImage *image) {
+    point_list_t results;
     point_list_t whites;
     point_list_t edges;
 
+    vec_init(&results);
     vec_init(&whites);
     vec_init(&edges);
 
@@ -83,19 +85,41 @@ void process_bitmap(BitmapImage *image) {
     memset(grayscale.data, 0, grayscale.stride * (grayscale.height + 2 * grayscale.offset));
 
     for (uint32_t i = 0; i < 15; i++) {
+        printf("Pixel list len: %d\n", whites.len);
         erode_pass(grayscale_ptr, buffer_ptr, &whites);
         remove_pass(grayscale_ptr, buffer_ptr, &whites);
-        SWAP(grayscale_ptr, buffer_ptr)
 
+        BitmapImage bmp;
+        init_bitmap(&bmp, image->bitmap.width, image->bitmap.height);
+        for (uint32_t i = 0; i < whites.len; i++) {
+            uint32_t x = whites.data[i].x;
+            uint32_t y = whites.data[i].y;
+            bmp_set_pixels(&bmp.bitmap, x, y, 255, 255, 255);
+        }
+        
         FILE* fp;
         char buff[512];
+        sprintf(buff, "%s/whites-%d.bmp", "./res", i);
+        DEBUG_BMP(&bmp, buff);
+
+        detect_pass(&results, grayscale_ptr, &whites);
+        remove_pass(grayscale_ptr, buffer_ptr, &whites);
+        
+        SWAP(grayscale_ptr, buffer_ptr)
+        
         sprintf(buff, "%s/erode_pass_%u.bmp", pass_dir, i);
         DEBUG_IMAGE8U(buffer_ptr, buff);
     }
     
-    image8u_to_bmp(image, &buffer);
+    // image8u_to_bmp(image, &buffer);
+    printf("Found %u results\n", results.len);
 
+    for (uint32_t i = 0; i < results.len; i++) {
+        uint32_t x = results.data[i].x;
+        uint32_t y = results.data[i].y;
 
+        draw_cross(&image->bitmap, x, y, 255, 0, 0);
+    }
 
     /*
 
@@ -132,7 +156,11 @@ void process_bitmap(BitmapImage *image) {
     vec_free(&peaks);
 
     //*/
-
+    
+    vec_free(&edges);
+    vec_free(&whites);
+    vec_free(&results);
+    
     destroy_image8u(&grayscale);
     destroy_image8u(&buffer);
 }

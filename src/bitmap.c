@@ -73,7 +73,7 @@ void init_bitmap(BitmapImage* bmp, uint32_t width, uint32_t height)
     bmp->bitmap.height = height;
     bmp->bitmap.byte_pp = 3;
     bmp->bitmap.row_width = row_width;
-    bmp->bitmap.data = malloc(bmp->bitmap.row_width * bmp->bitmap.height);
+    bmp->bitmap.data = calloc(1, bmp->bitmap.row_width * bmp->bitmap.height);
 }
 
 void bmp_filter(BitmapData *bmp, uint32_t threshold) {
