@@ -455,7 +455,7 @@ int32_t main(int argc, char** argv)
         return 0;
     }
 
-    printf("Running with %d kernels\n", kernels.len);
+    printf("Running with %d custom kernels\n", kernels.len);
 
     // if not pass_dir exists, create it
     struct stat st;
