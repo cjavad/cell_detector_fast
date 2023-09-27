@@ -266,6 +266,6 @@ void detect_cell(BitmapData* bmp, GrayScale* image, int32_t cx, int32_t cy)
             }
         }
 
-        draw_cross(bmp, cx, cy, 255, 0, 0);
+        draw_cross(bmp, cx, cy, 255, 0, 0, 70);
     }
 }

@@ -35,9 +35,7 @@ char* pass_dir = NULL;
 char* input = NULL;
 char* output = NULL;
 
-uint32_t cccount = 0;
-
-void process_bitmap(BitmapImage *image) {
+void erode(point_list_t* cells, BitmapImage* image, Image8u* grayscale_ptr, Image8u* buffer_ptr) {
     point_list_t results;
     point_list_t whites;
     point_list_t edges;
@@ -48,6 +46,87 @@ void process_bitmap(BitmapImage *image) {
 
     swizle_ma_jizle(&whites, &edges, &image->bitmap, 88);
 
+    ///*
+    swizle_ma_edges(grayscale_ptr, buffer_ptr, &edges, 60);
+    memset(buffer_ptr->data, 0, buffer_ptr->stride * (buffer_ptr->height + 2 * buffer_ptr->offset));
+
+    swizle_ma_whites(buffer_ptr, grayscale_ptr, &whites);
+    memset(grayscale_ptr->data, 0, grayscale_ptr->stride * (grayscale_ptr->height + 2 * grayscale_ptr->offset));
+
+    FILE* fp;
+    char buff[512];
+
+
+    for (uint32_t i = 0; whites.len > 0; i++) {
+        printf("Pixel list len: %d\n", whites.len);
+        erode_pass(grayscale_ptr, buffer_ptr, &whites);
+        remove_pass(grayscale_ptr, buffer_ptr, &whites);
+
+
+        detect_pass(&results, grayscale_ptr, &whites);
+        remove_pass(grayscale_ptr, buffer_ptr, &whites);
+        
+        SWAP(grayscale_ptr, buffer_ptr)
+
+        if (pass_dir != NULL) {
+            sprintf(buff, "%s/erode_pass_%u.bmp", pass_dir, i);
+            DEBUG_IMAGE8U(buffer_ptr, buff);
+        }
+    }
+    
+    // image8u_to_bmp(image, &buffer);
+    printf("Found %u results\n", results.len);
+
+    for (uint32_t i = 0; i < results.len; i++) {
+        uint32_t x = results.data[i].x;
+        uint32_t y = results.data[i].y;
+
+        vec_push(cells, ((point_t){x, y}));
+    }
+
+    vec_free(&edges);
+    vec_free(&whites);
+    vec_free(&results);
+}
+
+void peekpoints(point_list_t* cells, Image8u* buffer_ptr) {
+    PeakVec peaks;
+    vec_init(&peaks);
+
+    find_peaks(&peaks, buffer_ptr);
+
+    printf("Found %u peaks\n", peaks.len);
+
+    for (uint32_t j = 0; j < peaks.len; j++) {
+        uint32_t peak = peaks.data[j];
+        buffer_ptr->data[peak] = 255;
+
+        uint32_t x = peak % buffer_ptr->stride - buffer_ptr->offset;
+        uint32_t y = peak / buffer_ptr->stride - buffer_ptr->offset;
+
+        // Draw cross here with center at x, y on top of image
+        vec_push(cells, ((point_t){x, y}));
+    }
+
+    if (pass_dir != NULL) {
+        FILE* fp;
+        char buff[512];
+        sprintf(buff, "%s/peaks.bmp", pass_dir);
+        DEBUG_IMAGE8U(buffer_ptr, buff);
+    }
+
+    vec_free(&peaks);
+}
+
+
+void grade() {
+
+}
+
+void process_bitmap(BitmapImage *image) {
+    point_list_t cells;
+    vec_init(&cells);
+
     Image32f in, out;
     Image32f* in_ptr = &in;
     Image32f* out_ptr = &out;
@@ -55,8 +134,6 @@ void process_bitmap(BitmapImage *image) {
     init_image32f(&in, image->bitmap.width, image->bitmap.height, 32);
     init_image32f(&out, image->bitmap.width, image->bitmap.height, 32);
     image32f_from_bmp(&in, image);
-
-    gen_grad(&in, cccount++);
 
     for (uint32_t i = 0; i < kernels.len; i++) {
         kernel_pass(out_ptr, in_ptr, &kernels.data[i]);
@@ -77,102 +154,22 @@ void process_bitmap(BitmapImage *image) {
     Image8u* grayscale_ptr = &grayscale;
     Image8u* buffer_ptr = &buffer;
 
-    init_image8u(&grayscale, image->bitmap.width, image->bitmap.height, 32);
-    init_image8u(&buffer, image->bitmap.width, image->bitmap.height, 32);
+    init_image8u(grayscale_ptr, image->bitmap.width, image->bitmap.height, 32);
+    init_image8u(buffer_ptr, image->bitmap.width, image->bitmap.height, 32);
 
-    image8u_from_image32f(&buffer, in_ptr);
+    image8u_from_image32f(buffer_ptr, in_ptr);
     destroy_image32f(in_ptr);
 
+    // erode(&cells, image, grayscale_ptr, buffer_ptr);
+    // peekpoints(&cells, buffer_ptr);
 
-    ///*
-    swizle_ma_edges(&grayscale, &buffer, &edges, 60);
-    memset(buffer.data, 0, buffer.stride * (buffer.height + 2 * buffer.offset));
+    for (uint32_t i = 0; i < cells.len; i++) {
+        uint32_t x = cells.data[i].x;
+        uint32_t y = cells.data[i].y;
 
-    swizle_ma_whites(&buffer, &grayscale, &whites);
-    memset(grayscale.data, 0, grayscale.stride * (grayscale.height + 2 * grayscale.offset));
-
-    for (uint32_t i = 0; whites.len && 8008135; i++) {
-        printf("Pixel list len: %d\n", whites.len);
-        erode_pass(grayscale_ptr, buffer_ptr, &whites);
-        remove_pass(grayscale_ptr, buffer_ptr, &whites);
-
-        BitmapImage bmp;
-        init_bitmap(&bmp, image->bitmap.width, image->bitmap.height);
-        for (uint32_t i = 0; i < whites.len; i++) {
-            uint32_t x = whites.data[i].x;
-            uint32_t y = whites.data[i].y;
-            bmp_set_pixels(&bmp.bitmap, x, y, 255, 255, 255);
-        }
-        
-        FILE* fp;
-        char buff[512];
-        
-        if (pass_dir != NULL) {
-            sprintf(buff, "%s/whites-%d.bmp", pass_dir, i);
-            DEBUG_BMP(&bmp, buff);
-        }
-
-        detect_pass(&results, grayscale_ptr, &whites);
-        remove_pass(grayscale_ptr, buffer_ptr, &whites);
-        
-        SWAP(grayscale_ptr, buffer_ptr)
-
-        if (pass_dir != NULL) {
-            sprintf(buff, "%s/erode_pass_%u.bmp", pass_dir, i);
-            DEBUG_IMAGE8U(buffer_ptr, buff);
-        }
-    }
-    
-    // image8u_to_bmp(image, &buffer);
-    printf("Found %u results\n", results.len);
-
-    for (uint32_t i = 0; i < results.len; i++) {
-        uint32_t x = results.data[i].x;
-        uint32_t y = results.data[i].y;
-
-        draw_cross(&image->bitmap, x, y, 255, 0, 0);
-    }
-    //*/
-
-    /*
-
-    PeakVec peaks;
-    vec_init(&peaks);
-
-    find_peaks(&peaks, buffer_ptr);
-
-    printf("Found %u peaks\n", peaks.len);
-
-    // bmp_filter(&image->bitmap, 88);
-
-    for (uint32_t j = 0; j < peaks.len; j++) {
-        uint32_t peak = peaks.data[j];
-        buffer_ptr->data[peak] = 255;
-
-        uint32_t x = peak % buffer_ptr->stride - buffer_ptr->offset;
-        uint32_t y = peak / buffer_ptr->stride - buffer_ptr->offset;
-
-        // Draw cross here with center at x, y on top of image
-        draw_cross(&image->bitmap, x, y, 255, 0, 0);
+        draw_cross(&image->bitmap, x, y, 255, 0, 0, 70);
     }
 
-    if (pass_dir != NULL) {
-        FILE* fp;
-        char buff[512];
-        sprintf(buff, "%s/peaks.bmp", pass_dir);
-        DEBUG_IMAGE8U(buffer_ptr, buff);
-
-        //sprintf(buff, "%s/debug.bmp", pass_dir);
-        //DEBUG_BMP(buffer_ptr, buff);
-
-    }
-    vec_free(&peaks);
-
-    //*/
-    
-    vec_free(&edges);
-    vec_free(&whites);
-    vec_free(&results);
     
     destroy_image8u(&grayscale);
     destroy_image8u(&buffer);
@@ -238,8 +235,8 @@ void create_kernel() {
             init_gaussian_kernel(&kernel, kernel_size, kernel_arg);
             break;
         case 2:
-            printf("Initializing laplacian kernel with size: %d\n", kernel_size);
-            init_laplacian_kernel(&kernel, kernel_size);
+            printf("Initializing laplacian kernel with size: %d and scale: %f\n", kernel_size, kernel_arg);
+            init_laplacian_kernel(&kernel, kernel_size, kernel_arg);
             break;
         case 3:
             printf("Initializing LoG with size: %d sigma: %f and scale %f\n", kernel_size, kernel_arg, kernel_arg2);
