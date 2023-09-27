@@ -116,19 +116,18 @@ void destroy_bitmap(BitmapImage* image) {
 
 
 #define CROSS_SIZE 5
-#define THRESHOLD 0
 
-void draw_cross(BitmapData *bmp, uint32_t x, uint32_t y, uint8_t r, uint8_t g, uint8_t b) {
+void draw_cross(BitmapData *bmp, uint32_t x, uint32_t y, uint8_t r, uint8_t g, uint8_t b, uint8_t thold) {
     if (
-        bmp_get_pixel_secure(bmp, x + 0, y, 0) < THRESHOLD ||
-        bmp_get_pixel_secure(bmp, x + 1, y, 0) < THRESHOLD ||
-        bmp_get_pixel_secure(bmp, x - 1, y, 0) < THRESHOLD ||
-        bmp_get_pixel_secure(bmp, x, y + 1, 0) < THRESHOLD ||
-        bmp_get_pixel_secure(bmp, x, y - 1, 0) < THRESHOLD
+        bmp_get_pixel_secure(bmp, x + 0, y, 0) < thold ||
+        bmp_get_pixel_secure(bmp, x + 1, y, 0) < thold ||
+        bmp_get_pixel_secure(bmp, x - 1, y, 0) < thold ||
+        bmp_get_pixel_secure(bmp, x, y + 1, 0) < thold ||
+        bmp_get_pixel_secure(bmp, x, y - 1, 0) < thold
     
     ) return;
 
-
+    printf("Cell at (%i, %i)\n", x, y);
 
     for (uint32_t i = 0; i < CROSS_SIZE; i++) {
         bmp_set_pixels(bmp, x + i, y, r, g, b);

@@ -111,7 +111,7 @@ void init_gaussian_kernel(Kernel* kernel, int32_t size, float scale) {
 }
 
 
-void init_laplacian_kernel(Kernel *kernel, int32_t size) {
+void init_laplacian_kernel(Kernel *kernel, int32_t size, float scale) {
     KERNEL_INIT(kernel, size)
     KERNEL_NORM_START
 
@@ -121,7 +121,7 @@ void init_laplacian_kernel(Kernel *kernel, int32_t size) {
             float dy = (float) (y - half);
 
             if (dx == 0 && dy == 0) {
-                kernel->data[y * size + x] = -(size - 1) * (size - 1);
+                kernel->data[y * size + x] = scale * (-(size - 1) * (size - 1));
             } else {
                 kernel->data[y * size + x] = half - (fabs(dx) + fabs(dy) - 1); 
                 if (kernel->data[y * size + x] < 0) kernel->data[y * size + x] = 0;
