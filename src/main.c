@@ -87,7 +87,7 @@ void erode(point_list_t* cells, BitmapImage* image, Image8u* grayscale_ptr, Imag
     memset(grayscale_ptr->data, 0, grayscale_ptr->stride * (grayscale_ptr->height + 2 * grayscale_ptr->offset));
 
     for (uint32_t i = 0; whites.len > 0; i++) {
-        printf("Pixel list len: %d\n", whites.len);
+//        printf("Pixel list len: %d\n", whites.len);
         erode_pass(grayscale_ptr, buffer_ptr, &whites);
         remove_pass(grayscale_ptr, buffer_ptr, &whites);
 
