@@ -237,6 +237,10 @@ void create_kernel() {
             printf("Initializing LoG with size: %d sigma: %f and scale %f\n", kernel_size, kernel_arg, kernel_arg2);
             init_log_kernel(&kernel, kernel_size, kernel_arg, kernel_arg2);
             break;
+        case 4:
+            printf("Initializing DoG with size: %d sigma1: %f and sigma2: %f\n", kernel_size, kernel_arg, kernel_arg2);
+            init_dog_kernel(&kernel, kernel_size, kernel_arg, kernel_arg2);
+            break;
         default:
             break;
     }
@@ -381,6 +385,7 @@ int32_t main(int argc, char** argv)
         printf("  1\t GAUSSIAN\n");
         printf("  2\t LAPLACIAN\n");
         printf("  3\t LoG\n");
+        printf("  4\t DoG\n");
 
         return 0;
     }
