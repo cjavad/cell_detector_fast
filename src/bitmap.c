@@ -128,7 +128,7 @@ uint32_t draw_cross(BitmapData *bmp, uint32_t x, uint32_t y, uint8_t r, uint8_t 
     
     ) return 0;
 
-    printf("Cell at (%i, %i)\n", x, y);
+    // printf("Cell at (%i, %i)\n", x, y);
 
     for (uint32_t i = 0; i < CROSS_SIZE; i++) {
         for (uint32_t j = 0; j < CROSS_THICKNESS; j++) {

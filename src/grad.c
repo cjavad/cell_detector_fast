@@ -8,6 +8,9 @@
 
 #include "bitmap.h"
 
+
+void find_grad(float* dx, float* dy, Image32f* input, int32_t x, int32_t y);
+
 void calc_grad(float* dx, float* dy, Image32f* image, int32_t x, int32_t y)
 {
 	float p = image32f_get_pixel(image, x, y);
@@ -117,7 +120,8 @@ void gen_grad(Image32f* image, point_list_t* cells)
 				continue;
 			}
 			float dx, dy;
-			calc_grad(&dx, &dy, image, x, y);
+			find_grad(&dx, &dy, image, x, y);
+			// calc_grad(&dx, &dy, image, x, y);
 			float r = ((dx * 127.0f) + 128.0f);
 			float g = ((dy * 127.0f) + 128.0f);
 			bmp_set_pixels(&img.bitmap, x, y, (uint8_t)r, (uint8_t)g, 0);
@@ -179,9 +183,9 @@ void gen_grad(Image32f* image, point_list_t* cells)
 		}
 	}
 
-	FILE* fp = fopen("res/unsafe.bmp", "wb");
-	write_bitmap(fp, &img);
-	fclose(fp);
+	// FILE* fp = fopen("res/unsafe.bmp", "wb");
+	// write_bitmap(fp, &img);
+	// fclose(fp);
 
 
 	free_bitmap(&img);
@@ -189,17 +193,17 @@ void gen_grad(Image32f* image, point_list_t* cells)
     vec_free(&gpoints);
 }
 
-void find_grad(grad_point_t* p, BitmapData* input, int32_t x, int32_t y)
+void find_grad(float* dx, float* dy, Image32f* input, int32_t x, int32_t y)
 {
-	uint8_t xm1 = bmp_get_pixel_secure(input, x - 1, y, 0);
-	uint8_t xp1 = bmp_get_pixel_secure(input, x + 1, y, 0);
-	uint8_t ym1 = bmp_get_pixel_secure(input, x, y - 1, 0);
-	uint8_t yp1 = bmp_get_pixel_secure(input, x, y + 1, 0);
+	float xm1 = image32f_get_pixel(input, x - 1, y);
+	float xp1 = image32f_get_pixel(input, x + 1, y);
+	float ym1 = image32f_get_pixel(input, x, y - 1);
+	float yp1 = image32f_get_pixel(input, x, y + 1);
 
-	uint8_t xm1ym1 = bmp_get_pixel_secure(input, x - 1, y - 1, 0);
-	uint8_t xp1yp1 = bmp_get_pixel_secure(input, x + 1, y + 1, 0);
-	uint8_t xm1yp1 = bmp_get_pixel_secure(input, x - 1, y + 1, 0);
-	uint8_t xp1ym1 = bmp_get_pixel_secure(input, x + 1, y - 1, 0);
+	float xm1ym1 = image32f_get_pixel(input, x - 1, y - 1);
+	float xp1yp1 = image32f_get_pixel(input, x + 1, y + 1);
+	float xm1yp1 = image32f_get_pixel(input, x - 1, y + 1);
+	float xp1ym1 = image32f_get_pixel(input, x + 1, y - 1);
 
 	// from left to right (white left = -1, white right = 1, no net = 0)	
 	float lr = (xp1 - xm1);
@@ -210,14 +214,6 @@ void find_grad(grad_point_t* p, BitmapData* input, int32_t x, int32_t y)
 	// same but bottom right to top left
 	float tl = (xm1yp1 - xp1ym1);
 
-	float gx = lr + tr * 0.707f - tl * 0.707f;
-	float gy = bt + tr * 0.707f + tl * 0.707f;
-
-	float fac = 1 / sqrt(gx * gx + gy * gy);
-
-	p->x = x;
-	p->y = y;
-	
-	p->dx = gx * fac;
-	p->dy = gy * fac;
+	*dx = lr + tr * 0.707f - tl * 0.707f;
+	*dy = bt + tr * 0.707f + tl * 0.707f;
 }
