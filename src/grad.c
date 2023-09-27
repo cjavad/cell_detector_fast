@@ -39,6 +39,10 @@ void gen_grad(Image32f* image, int id)
 	{
 		for (uint32_t x = 0; x < image->width; x++)
 		{
+			if (image32f_get_pixel(image, x, y) < 88.0f / 255.0f) {
+				bmp_set_pixels(&img.bitmap, x, y, 0, 0, 0);
+				continue;
+			}
 			float dx, dy;
 			calc_grad(&dx, &dy, image, x, y);
 			float r = ((dx * 127.0f) + 128.0f);
@@ -89,6 +93,9 @@ inline void find_intersect(float* o_s, float* o_t, grad_point_t* p0, grad_point_
 	*o_t = t;
 }
 
+#define STEP_A 8
+#define STEP_B 2
+
 void find_grad(grad_point_t* p, BitmapData* input, int32_t x, int32_t y)
 {
 	uint8_t xm1 = bmp_get_pixel_secure(input, x - 1, y, 0);
@@ -135,8 +142,6 @@ void grad_pass(BitmapData* input, int id)
 	// find edge points and calculate gradient
 	for (uint32_t y = 0; y < input->height; y++)
 	{
-		uint32_t img_offset = IMAGE_GET_OFFSET(&img, 0, y);
-
 		for (uint32_t x = 0; x < input->width; x++)
 		{
 			if (bmp_get_pixel(input, x, y, 0) <= thold) continue;
@@ -165,51 +170,29 @@ void grad_pass(BitmapData* input, int id)
 	point_list_t fill;
 	vec_init(&fill);
 
+	grad_point_list_t set;
+	vec_init(&set);
+
 	for (uint32_t i = 0; i < points.len; i++)
 	{
-
+		point_t pt = points.data[i];
 		// black check
-		if (!image8u_get_pixel(&img, points.data[i].x, points.data[i].y)) continue;
+		if (!image8u_get_pixel(&img, pt.x, pt.y)) continue;
 		
 		// flood fill
-		grad_point_t o;
-		find_grad(&o, input, points.data[i].x, points.data[i].y);
 
+		set.len = 0;
 		fill.len = 0;
 
-		grad_point_t p = o;
-
-		uint8_t mx = image8u_get_pixel(&img, p.x - 1, p.y);
-		uint8_t px = image8u_get_pixel(&img, p.x + 1, p.y);
-		uint8_t my = image8u_get_pixel(&img, p.x, p.y - 1);
-		uint8_t py = image8u_get_pixel(&img, p.x, p.y + 1);
-
-		if (mx) vec_push(&fill, ((point_t){p.x - 1, p.y}));
-		if (px) vec_push(&fill, ((point_t){p.x + 1, p.y}));
-		if (my) vec_push(&fill, ((point_t){p.x, p.y - 1}));
-		if (py) vec_push(&fill, ((point_t){p.x, p.y + 1}));
-
-		// skip lone pixel
-		if (!fill.len) continue;
-
-		float sx = 0;
-		float sy = 0;
-		uint32_t pcount = 0;
+		vec_push(&fill, pt);
 
 		while (fill.len) {
-			{
-				point_t temp = vec_pop(&fill);
-				find_grad(&p, input, temp.x, temp.y);
-			}
+			pt = vec_pop(&fill);
+			grad_point_t p;
+			find_grad(&p, input, pt.x, pt.y);
 
-			float s, t;
-
-			find_intersect(&s, &t, &o, &p);
-
-			if (s < -0.1f || t < -0.1f) continue;
-
+			vec_push(&set, p);
 			image8u_set_pixel(&img, p.x, p.y, 0);
-
 
 			uint8_t mx = image8u_get_pixel(&img, p.x - 1, p.y);
 			uint8_t px = image8u_get_pixel(&img, p.x + 1, p.y);
@@ -220,24 +203,48 @@ void grad_pass(BitmapData* input, int id)
 			if (px) vec_push(&fill, ((point_t){p.x + 1, p.y}));
 			if (my) vec_push(&fill, ((point_t){p.x, p.y - 1}));
 			if (py) vec_push(&fill, ((point_t){p.x, p.y + 1}));
-			
-			if (s < 0 || t < 0) continue;
-
-			if (s * s * o.dx * o.dy + s * s * o.dy * o.dy > 10 * 10) continue;
-			
-			pcount++;
-			sx += s * o.dx + o.x;
-			sy += s * o.dy + o.y;
 		}
 
-		// need enough points
-		if (pcount <= 5) continue;
+		for (uint32_t j = 0; j < set.len; j += STEP_A)
+		{
+			grad_point_t o = set.data[j];
 
-		// push average		
-		vec_push(&results, ((point_t){(int16_t)(sx / pcount), (int16_t)(sy / pcount)}));
+			uint32_t cx = o.x;
+			uint32_t cy = o.y;
+			uint32_t pcount = 1; 
+
+			for (uint32_t k = 0; k < set.len; k += STEP_B) 
+			{
+				if (k == j) continue;
+				grad_point_t p = set.data[k];
+
+				int32_t dx = p.x - o.x;
+				int32_t dy = p.y - o.y;
+
+				if (dx * dx + dy * dy > 24 * 24) continue;
+
+				float s, t;
+				find_intersect(&s, &t, &o, &p);
+				
+				if (s < 0 || t < 0) continue;
+				
+				float idx = s * o.dx;
+				float idy = s * o.dy;
+
+				if (idx * idx + idy * idy > 12 * 12) continue;
+
+				cx += p.x;
+				cy += p.y;
+				pcount++;
+			}
+
+			if (pcount <= 15) continue;
+			vec_push(&results, ((point_t){(cx / pcount),(cy / pcount)}));
+		}
 	}
 
 	vec_free(&fill);
+	vec_free(&set);
 
 	BitmapImage output;
 	init_bitmap(&output, input->width, input->height);

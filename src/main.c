@@ -68,6 +68,10 @@ void process_bitmap(BitmapImage *image) {
         }
     }
 
+    gen_grad(in_ptr, cccount++);
+
+    return;
+
     destroy_image32f(out_ptr);
 
     Image8u grayscale, buffer;
@@ -81,10 +85,11 @@ void process_bitmap(BitmapImage *image) {
     image8u_from_image32f(&buffer, in_ptr);
 
     image32f_to_bmp(image, in_ptr);
-    grad_pass(&image->bitmap, cccount++);
+    // grad_pass(&image->bitmap, cccount++);
+
+    // return;
 
     destroy_image32f(in_ptr);
-
 
     swizle_ma_edges(&grayscale, &buffer, &edges, 60);
     memset(buffer.data, 0, buffer.stride * (buffer.height + 2 * buffer.offset));
