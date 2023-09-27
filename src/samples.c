@@ -102,7 +102,7 @@ void write_sample(sample_t *sample) {
     resolve_output_path(path, sample->sample_type, sample->sample_name);
 
     FILE* fp = fopen(path, "wb");
-    
+    printf("fp: %p, path: %s\n", fp, path);
     write_bitmap(fp, sample->output_bmp);
 
     fclose(fp);

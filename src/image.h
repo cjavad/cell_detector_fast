@@ -28,19 +28,19 @@ void destroy_image8u(Image8u *image);
 void init_image32f(Image32f *image, uint32_t width, uint32_t height, uint32_t offset);
 void destroy_image32f(Image32f *image);
 
-__attribute__((always_inline)) inline uint8_t image8u_get_pixel(Image8u *image, uint32_t x, uint32_t y) {
+__attribute__((always_inline)) inline uint8_t image8u_get_pixel(Image8u *image, int32_t x, int32_t y) {
     return image->data[IMAGE_GET_OFFSET(image, x, y)];
 }
 
-__attribute__((always_inline)) inline void image8u_set_pixel(Image8u *image, uint32_t x, uint32_t y, uint8_t value) {
+__attribute__((always_inline)) inline void image8u_set_pixel(Image8u *image, int32_t x, int32_t y, uint8_t value) {
     image->data[IMAGE_GET_OFFSET(image, x, y)] = value;
 }
 
-__attribute__((always_inline)) inline float image32f_get_pixel(Image32f *image, uint32_t x, uint32_t y) {
+__attribute__((always_inline)) inline float image32f_get_pixel(Image32f *image, int32_t x, int32_t y) {
     return image->data[IMAGE_GET_OFFSET(image, x, y)];
 }
 
-__attribute__((always_inline)) inline void image32f_set_pixel(Image32f *image, uint32_t x, uint32_t y, float value) {
+__attribute__((always_inline)) inline void image32f_set_pixel(Image32f *image, int32_t x, int32_t y, float value) {
     image->data[IMAGE_GET_OFFSET(image, x, y)] = value;
 }
 

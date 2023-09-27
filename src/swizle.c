@@ -1,4 +1,6 @@
 #include "swizle.h"
+#include "image.h"
+#include "vec.h"
 #include <stdint.h>
 
 /**
@@ -24,4 +26,44 @@ void swizle_ma_jizle(point_list_t* whites, point_list_t* edges, BitmapData* bmp,
 			vec_push(edges, ((point_t){x, y}));
 		}
 	}
+}
+
+/**
+* Flood fill for every edge point, only copy found pixels to output.
+*/
+void swizle_ma_edges(Image8u *output, Image8u *input, point_list_t *edges, uint32_t thold) {    
+    point_list_t stack;
+    vec_init(&stack);
+    
+    for (uint32_t i = 0; i < edges->len; i++) {
+        stack.len = 0;
+        vec_push(&stack, edges->data[i]);
+
+        while (stack.len > 0) {
+            point_t p = vec_pop(&stack);
+
+            if (image8u_get_pixel(input, p.x, p.y) <= thold) continue;
+
+            image8u_set_pixel(output, p.x, p.y, 255);
+            image8u_set_pixel(input,  p.x, p.y, 0);
+
+            vec_push(&stack, ((point_t){p.x - 1, p.y}));
+            vec_push(&stack, ((point_t){p.x + 1, p.y}));
+            vec_push(&stack, ((point_t){p.x, p.y - 1}));
+            vec_push(&stack, ((point_t){p.x, p.y + 1}));
+        }
+    }
+
+
+    vec_free(&stack);
+}
+
+/**
+* Invert based on whites.
+*/
+void swizle_ma_whites(Image8u* output, Image8u* input, point_list_t* whites) {
+    for (uint32_t i = 0; i < whites->len; i++) {
+        point_t p = whites->data[i];
+        image8u_set_pixel(output, p.x, p.y, 255 - image8u_get_pixel(input, p.x, p.y));
+    }
 }

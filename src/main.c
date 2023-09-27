@@ -7,6 +7,7 @@
 #include <sys/types.h>
 
 #include "bitmap.h"
+#include "erode.h"
 #include "grayscale.h"
 #include "image.h"
 #include "peak.h"
@@ -63,13 +64,36 @@ void process_bitmap(BitmapImage *image) {
 
     destroy_image32f(out_ptr);
 
-    Image8u grayscale;
+    Image8u grayscale, buffer;
+
+    Image8u* grayscale_ptr = &grayscale;
+    Image8u* buffer_ptr = &buffer;
 
     init_image8u(&grayscale, image->bitmap.width, image->bitmap.height, 32);
-    image8u_from_image32f(&grayscale, in_ptr);
+    init_image8u(&buffer, image->bitmap.width, image->bitmap.height, 32);
+
+    image8u_from_image32f(&buffer, in_ptr);
     destroy_image32f(in_ptr);
 
-    image8u_to_bmp(image, &grayscale);
+
+    swizle_ma_edges(&grayscale, &buffer, &edges, 60);
+    memset(buffer.data, 0, buffer.stride * (buffer.height + 2 * buffer.offset));
+
+    swizle_ma_whites(&buffer, &grayscale, &whites);
+    memset(grayscale.data, 0, grayscale.stride * (grayscale.height + 2 * grayscale.offset));
+
+    for (uint32_t i = 0; i < 15; i++) {
+        erode_pass(grayscale_ptr, buffer_ptr, &whites);
+        remove_pass(grayscale_ptr, buffer_ptr, &whites);
+        SWAP(grayscale_ptr, buffer_ptr)
+
+        FILE* fp;
+        char buff[512];
+        sprintf(buff, "%s/erode_pass_%u.bmp", pass_dir, i);
+        DEBUG_IMAGE8U(buffer_ptr, buff);
+    }
+    
+    image8u_to_bmp(image, &buffer);
 
 
 
@@ -110,6 +134,7 @@ void process_bitmap(BitmapImage *image) {
     //*/
 
     destroy_image8u(&grayscale);
+    destroy_image8u(&buffer);
 }
 
 void process_samples() {
@@ -130,8 +155,14 @@ void process_samples() {
         samples[i]->output_bmp = &inputImage; 
 
         process_bitmap(&inputImage);
+
+        printf("Heyo!\n");
+
         write_sample(samples[i]);
+        printf("Heyo 1.5!\n");
         free_sample(samples[i]);
+
+        printf("Heyo 2!\n");
     }
 
     free(samples);
