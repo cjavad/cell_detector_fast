@@ -5,7 +5,6 @@ void swizle_ma_jizle(point_list_t* whites, point_list_t* edges, BitmapData* bmp,
 {
 	for (uint32_t y = 0; y < bmp->height; y++)
 	{
-		uint32_t offset = y * bmp->row_width;
 		for (uint32_t x = 0; x < bmp->width; x++)
 		{
 			if (bmp_get_pixel(bmp, x, y, 0) <= thold) continue;
