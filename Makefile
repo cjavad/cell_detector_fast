@@ -44,9 +44,22 @@ O_FILES := $(patsubst $(SRCDIR)/%.c, $(OBJDIR)/%.o, $(C_FILES))
 IR_FILES := $(shell find $(RESDIR) -type f -name "*")
 OR_FILES := $(patsubst $(RESDIR)/%, $(BINDIR)/$(RESDIR)/%, $(IR_FILES))
 
-include $(D_FILES)
-
 .PHONY: raw build release compile clean purge run lines log deps
+
+purge: clean
+	@rm -rf $(DEPDIR)
+
+clean:
+	@rm -rf $(BINDIR)/$(EXECUTABLE)
+	@rm -rf $(OBJDIR)	
+
+clear_build_log:
+	@:>build.log
+	
+clean_deps:
+	@rm -rf $(DEPDIR)	
+
+-include $(D_FILES)
 
 raw: CFLAGS +=
 raw: PPFLAGS += -DDEBUG
@@ -76,19 +89,6 @@ log:
 
 errors:
 	@cat build.log | grep error
-	
-purge: clean
-	@rm -rf $(DEPDIR)
-
-clean:
-	@rm -rf $(BINDIR)/$(EXECUTABLE)
-	@rm -rf $(OBJDIR)	
-
-clear_build_log:
-	@:>build.log
-	
-clean_deps:
-	@rm -rf $(DEPDIR)	
 
 deps: clean_deps $(D_FILES)
 		
