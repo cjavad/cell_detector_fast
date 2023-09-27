@@ -107,12 +107,12 @@ void remove_peak(Image8u* img, uint32_t x, uint32_t y)
     vec_free(&indices);
 }
 
-void find_peaks(PeakVec* peaks, Image8u* image) {
+void find_peaks(PeakVec* peaks, Image8u* image, uint8_t thold) {
     for (uint32_t y = 0; y < image->height; y++) 
     {
         for (uint32_t x = 0; x < image->width; x++)
         {
-            if (image8u_get_pixel(image, x, y) < 80) continue;
+            if (image8u_get_pixel(image, x, y) < thold) continue;
 
             uint32_t peak = find_peak(image, x, y);
 
