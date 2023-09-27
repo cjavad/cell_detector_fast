@@ -6,10 +6,17 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
+#include <xmmintrin.h>
 
 #define max(a, b) ((a) > (b) ? (a) : (b))
 #define min(a, b) ((a) < (b) ? (a) : (b))
 #define clamp(x, a, b) (max(min(x, b), a))
+
+#define SIMD
+
+#ifdef SIMD
+    #include <immintrin.h>
+#endif
 
 void kernel_instance(Image32f* out, Image32f* in, Kernel* kernel, int32_t cx, int32_t cy)
 {
@@ -33,11 +40,55 @@ void kernel_instance(Image32f* out, Image32f* in, Kernel* kernel, int32_t cx, in
 	out->data[(in->offset + cy) * in->stride + in->offset + cx] = clamp(sum, 0.0, 1.0);
 }
 
+#ifdef SIMD
+void simd_instance(Image32f* out, Image32f* in, Kernel* kernel, int32_t cx, int32_t cy)
+{
+    const float zero = 0.0f;
+    const float one = 1.0f;
+    __m256 sum = _mm256_broadcast_ss(&zero);
+
+    uint32_t base_x = cx + in->offset - kernel->size / 2;
+    uint32_t base_y = cy + in->offset - kernel->size / 2;
+	uint32_t img_base = base_y * in->stride + base_x;
+
+	for (int32_t y = 0; y < kernel->size; y++)
+	{
+		uint32_t img_offset = img_base + y * in->stride;
+		uint32_t ker_offset = y * kernel->size;
+
+		for (int32_t x = 0; x < kernel->size; x++)
+		{
+            __m256 kdata = _mm256_broadcast_ss(&kernel->data[ker_offset + x]);
+            __m256 idata = _mm256_loadu_ps(&in->data[img_offset + x]);
+
+            sum = _mm256_fmadd_ps(kdata, idata, sum);
+
+			// sum += kernel->data[ker_offset + x] * in->data[img_offset + x];
+		}
+	}
+
+    sum = _mm256_max_ps(_mm256_min_ps(sum, _mm256_broadcast_ss(&one)), _mm256_broadcast_ss(&zero));
+
+    _mm256_storeu_ps(&out->data[(in->offset + cy) * in->stride + in->offset + cx], sum);
+}
+#endif
+
+
 void kernel_pass(Image32f* out, Image32f* in, Kernel* kernel)
 {
-	for (int32_t x = 0; x < in->width; x++)
+	for (int32_t y = 0; y < in->height; y++)
     {
-        for (int32_t y = 0; y < in->height; y++)
+        int32_t x = 0;
+
+#ifdef SIMD
+        for (; x + 7 < in->width; x+= 8)
+        {
+            simd_instance(out, in, kernel, x, y);
+        }
+
+#endif
+
+        for (; x < in->width; x++)
         {
             kernel_instance(out, in, kernel, x, y);
         }
