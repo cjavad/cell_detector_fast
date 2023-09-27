@@ -13,7 +13,7 @@ void fft_test(BitmapData* data)
 {
 #ifdef DEBUG
 	BitmapImage bmp;
-	create_bitmap(&bmp, data->width, data->height);
+	init_bitmap(&bmp, data->width, data->height);
 
 	float* imager = malloc(bmp.bitmap.width * bmp.bitmap.height * sizeof(float));
 	float* imagei = malloc(bmp.bitmap.width * bmp.bitmap.height * sizeof(float));

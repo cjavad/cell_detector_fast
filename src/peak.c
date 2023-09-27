@@ -4,9 +4,10 @@
 #include <stdio.h>
 
 #include "bitmap.h"
+#include "image.h"
 #include "vec.h"
 
-uint32_t find_highest_neighbor(BitmapData* bmp, uint32_t x, uint32_t y) 
+uint32_t find_highest_neighbor(Image8u* img, uint32_t x, uint32_t y) 
 {
     uint8_t best = 0;
     uint32_t bx = 0;
@@ -24,9 +25,10 @@ uint32_t find_highest_neighbor(BitmapData* bmp, uint32_t x, uint32_t y)
             int32_t ny = y + dy;
 
             if (nx < 0 || ny < 0) continue;
-            if (nx >= bmp->width || ny >= bmp->height) continue;
+            if (nx >= img->width || ny >= img->height) continue;
 
-            uint32_t val = bmp_get_pixel(bmp, nx, ny, 0);
+            uint32_t val = image8u_get_pixel(img, nx, ny);
+
             if (val > best) 
             {
                 best = val;
@@ -36,35 +38,35 @@ uint32_t find_highest_neighbor(BitmapData* bmp, uint32_t x, uint32_t y)
         }
     }
 
-    return bmp_get_pixel_offset(bmp, bx, by);
+    return IMAGE_GET_OFFSET(img, bx, by);
 }
 
-uint32_t find_peak(BitmapData* bmp, uint32_t x, uint32_t y) {
-    uint32_t index = bmp_get_pixel_offset(bmp, x, y);
-    uint8_t val = bmp->data[index];
+uint32_t find_peak(Image8u* img, uint32_t x, uint32_t y) {
+    uint32_t index = IMAGE_GET_OFFSET(img, x, y);
+    uint8_t val = img->data[index];
 
     while (1) 
     {   
-        uint32_t neighbor = find_highest_neighbor(bmp, x, y);
-        uint8_t nval = bmp->data[neighbor]; 
+        uint32_t neighbor = find_highest_neighbor(img, x, y);
+        uint8_t nval = img->data[neighbor]; 
 
         if (nval <= val) return index;
         
         index = neighbor;
-        x = neighbor % bmp->row_width / bmp->byte_pp;
-        y = neighbor / bmp->row_width;
+        x = neighbor % img->stride - img->offset;
+        y = neighbor / img->stride - img->offset;
         val = nval;
     }
 }
 
 #define MAX_DIST 15
 
-void remove_peak(BitmapData* bmp, uint32_t x, uint32_t y) 
+void remove_peak(Image8u* img, uint32_t x, uint32_t y) 
 {
     PeakVec indices;
     vec_init(&indices);
 
-    vec_push(&indices, bmp_get_pixel_offset(bmp, x, y));
+    vec_push(&indices, IMAGE_GET_OFFSET(img, x, y));
 
     int cx = x;
     int cy = y;
@@ -72,11 +74,11 @@ void remove_peak(BitmapData* bmp, uint32_t x, uint32_t y)
     while (indices.len > 0) {
         uint32_t index = vec_pop(&indices);
 
-        x = index % bmp->row_width / bmp->byte_pp;
-        y = index / bmp->row_width;
+        x = index % img->stride - img->offset;
+        y = index / img->stride - img->offset;
 
-        uint8_t val = bmp->data[index];
-        bmp->data[index] = 0;
+        uint8_t val = img->data[index];
+        img->data[index] = 0;
 
         for (int32_t dy = -1; dy <= 1; dy++) 
         {
@@ -88,15 +90,15 @@ void remove_peak(BitmapData* bmp, uint32_t x, uint32_t y)
                 int32_t ny = y + dy;
 
                 if (nx < 0 || ny < 0) continue;
-                if (nx >= bmp->width || ny >= bmp->height) continue;
+                if (nx >= img->width || ny >= img->height) continue;
 
                 if (abs(nx - cx) > MAX_DIST || abs(ny - cy) > MAX_DIST) continue;
  
-                uint8_t neighbor = bmp_get_pixel(bmp, nx, ny, 0);
+                uint8_t neighbor = image8u_get_pixel(img, nx, ny);
 
                 if (neighbor == 0 || neighbor > val) continue;
 
-                uint32_t nindex = bmp_get_pixel_offset(bmp, nx, ny);
+                uint32_t nindex = IMAGE_GET_OFFSET(img, nx, ny);
                 vec_push(&indices, nindex);
             }
         }
@@ -105,18 +107,19 @@ void remove_peak(BitmapData* bmp, uint32_t x, uint32_t y)
     vec_free(&indices);
 }
 
-void find_peaks(PeakVec* peaks, BitmapData* bmp) {
-    for (uint32_t y = 0; y < bmp->height; y++) 
+void find_peaks(PeakVec* peaks, Image8u* image) {
+    for (uint32_t y = 0; y < image->height; y++) 
     {
-        for (uint32_t x = 0; x < bmp->width; x++)
+        for (uint32_t x = 0; x < image->width; x++)
         {
-            if (bmp_get_pixel(bmp, x, y, 0) < 80) continue;
+            if (image8u_get_pixel(image, x, y) < 80) continue;
 
-            uint32_t peak = find_peak(bmp, x, y);
+            uint32_t peak = find_peak(image, x, y);
 
-            uint32_t px = peak % bmp->row_width / bmp->byte_pp;
-            uint32_t py = peak / bmp->row_width;
-            remove_peak(bmp, px, py);
+            uint32_t px = peak % image->stride - image->offset;
+            uint32_t py = peak / image->stride - image->offset;
+
+            remove_peak(image, px, py);
 
             vec_push(peaks, peak);
         }

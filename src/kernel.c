@@ -1,39 +1,15 @@
 #include "kernel.h"
 #include "bitmap.h"
+#include "image.h"
 
 #include <stdint.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
 
-#define ALIGN_8(x) (((x) + 7) & (~7))
-
 #define max(a, b) ((a) > (b) ? (a) : (b))
 #define min(a, b) ((a) < (b) ? (a) : (b))
 #define clamp(x, a, b) (max(min(x, b), a))
-#define swap(a, b) {void* swap_temp = a; a = b; b = swap_temp;}
-
-typedef struct {
-	uint32_t width;
-	uint32_t height;
-	uint32_t offset;
-	uint32_t stride;
-	float* data;
-} Image32f;
-
-void write_image32f(Image32f* image, uint32_t id);
-
-void image32f_from_bmp(Image32f* out, BitmapData* bmp)
-{
-	for (uint32_t y = 0; y < bmp->height; y++)
-	{
-		uint32_t bmp_offset = y * bmp->row_width;
-		uint32_t img_offset = (y + out->offset) * out->stride + out->offset;
-		for (uint32_t x = 0; x < bmp->width; x++) {
-            out->data[img_offset + x] = (float) bmp->data[bmp_offset + x * 3] / 255.0f;
-		}
-	}
-}
 
 void kernel_instance(Image32f* out, Image32f* in, Kernel* kernel, int32_t cx, int32_t cy)
 {
@@ -57,7 +33,7 @@ void kernel_instance(Image32f* out, Image32f* in, Kernel* kernel, int32_t cx, in
 	out->data[(in->offset + cy) * in->stride + in->offset + cx] = clamp(sum, 0.0, 1.0);
 }
 
-void run_kernel(Image32f* out, Image32f* in, Kernel* kernel)
+void kernel_pass(Image32f* out, Image32f* in, Kernel* kernel)
 {
 	for (int32_t x = 0; x < in->width; x++)
     {
@@ -68,84 +44,9 @@ void run_kernel(Image32f* out, Image32f* in, Kernel* kernel)
     }
 }
 
-void image32f_to_bitmap(Image32f* image, BitmapData* bmp) {
-    for (uint32_t y = 0; y < image->height; y++)
-	{
-		uint32_t bmp_offset = y * bmp->row_width;
-		uint32_t img_offset = (y + image->offset) * image->stride + image->offset;
-		for (uint32_t x = 0; x < image->width; x++)
-		{
-            bmp_set_offset(
-                bmp,
-                bmp_offset + x * 3, 
-                (uint8_t)(image->data[img_offset + x] * 255.0f),
-                (uint8_t)(image->data[img_offset + x] * 255.0f),
-                (uint8_t)(image->data[img_offset + x] * 255.0f)
-            );
-		}
-	}
-}
-
-void kernel_pass(BitmapData* bmp, Kernel* kernel)
-{
-	Image32f image;
-	Image32f buffer;
-
-	image.width = bmp->width;
-	image.height = bmp->height;
-	image.offset = ALIGN_8(32);
-	image.stride = image.width + 2 * image.offset;
-	image.data = calloc(1, (image.width + 2 * image.offset) * (image.height + 2 * image.offset) * sizeof(float));
-
-	buffer.width = image.width;
-	buffer.height = image.height;
-	buffer.offset = image.offset;
-	buffer.stride = image.stride;
-	buffer.data = calloc(1, (buffer.width + 2 * buffer.offset) * (buffer.height + 2 * buffer.offset) * sizeof(float));	
-
-    image32f_from_bmp(&buffer, bmp);
-	run_kernel(&image, &buffer, kernel);
-    free(buffer.data);    
-
-    image32f_to_bitmap(&image, bmp);
-    
-    free(image.data);
-}
-
-
-void write_image32f(Image32f* image, uint32_t id)
-{
-	char buff[512];
-	sprintf(buff, "res/kernel%u.bmp", id);
-	FILE* fp = fopen(buff, "wb");
-
-	BitmapImage bmp;
-	create_bitmap(&bmp, image->height, image->width);
-
-	for (uint32_t y = 0; y < image->height; y++)
-	{
-		uint32_t bmp_offset = y * bmp.bitmap.row_width;
-		uint32_t img_offset = (y + image->offset) * image->stride + image->offset;
-		for (uint32_t x = 0; x < image->width; x++)
-		{
-            bmp_set_offset(
-                &bmp.bitmap,
-                bmp_offset + x * 3, 
-                (uint8_t)(image->data[img_offset + x] * 255.0f),
-                (uint8_t)(image->data[img_offset + x] * 255.0f),
-                (uint8_t)(image->data[img_offset + x] * 255.0f)
-            );
-		}
-	}
-
-	write_bitmap(fp, &bmp);
-    free_bitmap(&bmp);
-	fclose(fp);
-}
-
 void write_kernel(FILE* fp, Kernel* kernel) {
 	BitmapImage bmp;
-	create_bitmap(&bmp, kernel->size, kernel->size);
+	init_bitmap(&bmp, kernel->size, kernel->size);
 
 	for (uint32_t y = 0; y < kernel->size; y++)
 	{

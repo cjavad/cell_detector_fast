@@ -8,6 +8,7 @@
 
 #include "bitmap.h"
 #include "grayscale.h"
+#include "image.h"
 #include "peak.h"
 #include "samples.h"
 
@@ -31,24 +32,42 @@ char* input = NULL;
 char* output = NULL;
 
 void process_bitmap(BitmapImage *image) {
-    BitmapImage bmp;
-    clone_bitmap(&bmp, image);
+    Image32f in, out;
+    Image32f* in_ptr = &in;
+    Image32f* out_ptr = &out;
+
+    init_image32f(&in, image->bitmap.width, image->bitmap.height, 32);
+    init_image32f(&out, image->bitmap.width, image->bitmap.height, 32);
+    image32f_from_bmp(&in, image);
 
     for (uint32_t i = 0; i < kernels.len; i++) {
-        kernel_pass(&bmp.bitmap, &kernels.data[i]);
+        kernel_pass(out_ptr, in_ptr, &kernels.data[i]);
+        SWAP(in_ptr, out_ptr)
+
+        printf("Run %d in_ptr is %p out_ptr is %p\n", i, in_ptr, out_ptr);
 
         if (pass_dir != NULL) {
             FILE* fp;
             char buff[512];
             sprintf(buff, "%s/kernel_pass_%u.bmp", pass_dir, i);
-            DEBUG_BMP(&bmp, buff);
+
+            printf("Writing ptr %p to %s\n", in_ptr, buff); 
+            DEBUG_IMAGE32F(in_ptr, buff);
         }
-    }
+    } 
+
+    destroy_image32f(out_ptr);
+
+    Image8u img;
+
+    init_image8u(&img, image->bitmap.width, image->bitmap.height, 32);
+    image8u_from_image32f(&img, in_ptr);
+    destroy_image32f(in_ptr);
 
     PeakVec peaks;
     vec_init(&peaks);
 
-    find_peaks(&peaks, &bmp.bitmap);
+    find_peaks(&peaks, &img);
 
     printf("Found %u peaks\n", peaks.len);
 
@@ -56,28 +75,26 @@ void process_bitmap(BitmapImage *image) {
 
     for (uint32_t j = 0; j < peaks.len; j++) {
         uint32_t peak = peaks.data[j];
-        bmp_set_offset(&bmp.bitmap, peak, 255, 0, 0);
+        img.data[peak] = 255;
 
-        uint32_t x = (peak % bmp.bitmap.row_width) / bmp.bitmap.byte_pp;
-        uint32_t y = peak / bmp.bitmap.row_width;
+        uint32_t x = peak % img.stride - img.offset;
+        uint32_t y = peak / img.stride - img.offset;
 
         // Draw cross here with center at x, y on top of image
         draw_cross(&image->bitmap, x, y, 255, 0, 0);
-        draw_cross(&bmp.bitmap, x, y, 255, 0, 0);
     }
-
 
     if (pass_dir != NULL) {
         FILE* fp;
         char buff[512];
         sprintf(buff, "%s/peaks.bmp", pass_dir);
-        DEBUG_BMP(&bmp, buff);
+        DEBUG_IMAGE8U(&img, buff);
 
         /*sprintf(buff, "%s/debug.bmp", pass_dir);
         DEBUG_BMP(&bmp, buff);*/
     }
 
-    free_bitmap(&bmp);
+    destroy_image8u(&img);
     vec_free(&peaks);
 }
 
@@ -101,6 +118,7 @@ void process_samples() {
         process_bitmap(&inputImage);
         write_sample(samples[i]);
         free_sample(samples[i]);
+        break;
     }
 
     free(samples);

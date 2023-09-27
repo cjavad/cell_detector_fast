@@ -6,7 +6,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-void bmp_to_grayscale(BitmapData *bitmap, GrayScale *image) {
+void bmp_to_grayscale(GrayScale *image, BitmapData *bitmap) {
     image->width = bitmap->width;
     image->height = bitmap->height;
     image->data = malloc(image->width * image->height);
@@ -49,7 +49,7 @@ void grayscale_to_bmp(BitmapImage *bmp, GrayScale *image) {
 
 void write_grayscale(FILE *fp, GrayScale *image) {
     BitmapImage bmp;
-    create_bitmap(&bmp, image->width, image->height);
+    init_bitmap(&bmp, image->width, image->height);
     grayscale_to_bmp(&bmp, image);
     write_bitmap(fp, &bmp);
     free_bitmap(&bmp);

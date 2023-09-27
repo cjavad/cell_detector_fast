@@ -30,7 +30,7 @@ void detect_pass(BitmapData* outbmp, GrayScale* image, PixelList* pixels);
 void debug_snapshot(uint32_t id, GrayScale* image, GrayScale* buffer, PixelList* pixels)
 {
 	BitmapImage bmp;
-	create_bitmap(&bmp, 950, 950);
+	init_bitmap(&bmp, 950, 950);
 
 	for (uint32_t y = 0; y < 950; y++)
 	{
@@ -69,7 +69,7 @@ void mark_cells(BitmapData* outbmp)
 	GrayScale* image = &b0;
 	GrayScale* buffer = &b1;
 
-	bmp_to_grayscale(outbmp, image);
+	bmp_to_grayscale(image, outbmp);
 	init_gray(buffer, b0.width, b0.height);
 
     memset(buffer->data, 0, buffer->width * buffer->height);

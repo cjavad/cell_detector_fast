@@ -40,7 +40,7 @@ int32_t main()
 	fp = fopen("res/out.bmp", "wb");
 
 	GrayScale image;
-	bmp_to_grayscale(&data, &image);
+	bmp_to_grayscale(&image, &data);
 
 	goto there;
 

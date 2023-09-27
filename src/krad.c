@@ -20,7 +20,7 @@ void krad_edge_pass(GrayScale* dest, GrayScale* src, const PixelList* const pixe
 void krad_debug_snapshot(uint32_t id, GrayScale* image, GrayScale* buffer, PixelList* pixels)
 {
 	BitmapImage bmp;
-	create_bitmap(&bmp, 950, 950);
+	init_bitmap(&bmp, 950, 950);
 
 	for (uint32_t y = 0; y < 950; y++)
 	{
