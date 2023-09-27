@@ -203,14 +203,16 @@ void process_bitmap(BitmapImage *image) {
     }
 
     destroy_image32f(in_ptr);
+    uint32_t count = 0;
 
     for (uint32_t i = 0; i < cells.len; i++) {
         uint32_t x = cells.data[i].x;
         uint32_t y = cells.data[i].y;
 
-        draw_cross(&image->bitmap, x, y, 255, 0, 0, method == METHOD_GRADE ? 0 : 70);
+        count += draw_cross(&image->bitmap, x, y, 255, 0, 0, method == METHOD_GRADE ? 0 : 70);
     }
 
+    printf("Found %u cells\n", count);
     
     destroy_image8u(&grayscale);
     destroy_image8u(&buffer);
