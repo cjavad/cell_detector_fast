@@ -185,6 +185,21 @@ void init_log_kernel(Kernel *kernel, int32_t size, float sigma, float scale)
     }
 }
 
+void init_dog_kernel(Kernel* kernel, int32_t size, float sigma1, float sigma2)
+{
+    Kernel gaus1, gaus2;
+    init_gaussian_kernel(&gaus1, size, sigma1);
+    init_gaussian_kernel(&gaus2, size, sigma2);
+
+    KERNEL_INIT(kernel, size)
+    for (int32_t i = 0; i < size * size; i++) {
+        kernel->data[i] = gaus1.data[i] - gaus2.data[i];
+    }
+
+    free_kernel(&gaus1);
+    free_kernel(&gaus2);
+}
+
 void free_kernel(Kernel *kernel) 
 {
     free(kernel->data);
