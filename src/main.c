@@ -87,7 +87,7 @@ void erode(point_list_t* cells, BitmapImage* image, Image8u* grayscale_ptr, Imag
     memset(grayscale_ptr->data, 0, grayscale_ptr->stride * (grayscale_ptr->height + 2 * grayscale_ptr->offset));
 
     for (uint32_t i = 0; whites.len > 0; i++) {
-        printf("Pixel list len: %d\n", whites.len);
+//        printf("Pixel list len: %d\n", whites.len);
         erode_pass(grayscale_ptr, buffer_ptr, &whites);
         remove_pass(grayscale_ptr, buffer_ptr, &whites);
 
@@ -122,7 +122,7 @@ void peekpoints(point_list_t* cells, Image8u* buffer_ptr) {
     PeakVec peaks;
     vec_init(&peaks);
 
-    find_peaks(&peaks, buffer_ptr);
+    find_peaks(&peaks, buffer_ptr, 90);
 
     printf("Found %u peaks\n", peaks.len);
 
@@ -219,7 +219,7 @@ void process_bitmap(BitmapImage *image) {
         uint32_t x = cells.data[i].x;
         uint32_t y = cells.data[i].y;
 
-        count += draw_cross(&image->bitmap, x, y, 255, 0, 0, method == METHOD_GRADE ? 0 : 70);
+        count += draw_cross(&image->bitmap, x, y, 255, 0, 0, method == METHOD_GRADE ? 0 : 100);
     }
 
     printf("Found %u cells\n", count);
@@ -470,26 +470,26 @@ int32_t main(int argc, char** argv)
             case METHOD_ERODE:
                 kernel_type = KERNEL_TYPE_GAUSSIAN;
                 kernel_size = 14;
-                kernel_arg = 3.3f;
+                kernel_arg = 3.0f;
                 create_kernel();
 
                 kernel_type = KERNEL_TYPE_LOG;
                 kernel_size = 9;
-                kernel_arg = 0.9f;
+                kernel_arg = 1.1f;
                 kernel_arg2 = 100.0f;
                 create_kernel();
                 break;
             case METHOD_PEEKPOINTS:
                 kernel_type = KERNEL_TYPE_GAUSSIAN;
-                kernel_size = 11;
-                kernel_arg = 3.3f;
+                kernel_size = 9;
+                kernel_arg = 5.0f;
                 create_kernel();
 
                 kernel_type = KERNEL_TYPE_LAPLACIAN;
-                kernel_size = 21;
-                kernel_arg = 1.0f;
-                kernel_arg2 = 1.0f;
+                kernel_size = 23;
+                kernel_arg = 0.75f;
                 create_kernel();
+
                 break;
             case METHOD_GRADE:
                 kernel_type = KERNEL_TYPE_GAUSSIAN;

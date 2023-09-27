@@ -44,7 +44,7 @@ void remove_pass(Image8u *output, Image8u *input, point_list_t *pixels) {
 	pixels->len = write;
 }
 
-#define DETECT_SIZE 5
+#define DETECT_SIZE 7
 #define RANGE (DETECT_SIZE / 2)
 
 void detect_pass(point_list_t* results, Image8u* image, point_list_t* pixels) {
