@@ -56,8 +56,6 @@ void process_bitmap(BitmapImage *image) {
     init_image32f(&out, image->bitmap.width, image->bitmap.height, 32);
     image32f_from_bmp(&in, image);
 
-    gen_grad(&in, cccount++);
-
     for (uint32_t i = 0; i < kernels.len; i++) {
         kernel_pass(out_ptr, in_ptr, &kernels.data[i]);
         SWAP(in_ptr, out_ptr)
@@ -81,6 +79,10 @@ void process_bitmap(BitmapImage *image) {
     init_image8u(&buffer, image->bitmap.width, image->bitmap.height, 32);
 
     image8u_from_image32f(&buffer, in_ptr);
+
+    image32f_to_bmp(image, in_ptr);
+    grad_pass(&image->bitmap, cccount++);
+
     destroy_image32f(in_ptr);
 
 

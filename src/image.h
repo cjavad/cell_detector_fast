@@ -4,6 +4,11 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#include "vec.h"
+
+typedef struct {int16_t x; int16_t y;} point_t;
+typedef Vec(point_t) point_list_t;
+
 typedef struct {
     uint32_t width;
     uint32_t height;
