@@ -75,19 +75,16 @@ void image8u_from_image32f(Image8u *dest, Image32f *src) {
 }
 
 
-void write_image32f(FILE* fp, Image32f* image)
-{
-	BitmapImage bmp;
-	init_bitmap(&bmp, image->height, image->width);
-
-	for (uint32_t y = 0; y < image->height; y++)
+void image32f_to_bmp(BitmapImage *bmp, Image32f *image) {
+    for (uint32_t y = 0; y < image->height; y++)
 	{
-		uint32_t bmp_offset = y * bmp.bitmap.row_width;
+		uint32_t bmp_offset = y * bmp->bitmap.row_width;
 		uint32_t img_offset = (y + image->offset) * image->stride + image->offset;
+
 		for (uint32_t x = 0; x < image->width; x++)
 		{
             bmp_set_offset(
-                &bmp.bitmap,
+                &bmp->bitmap,
                 bmp_offset + x * 3, 
                 (uint8_t)(image->data[img_offset + x] * 255.0f),
                 (uint8_t)(image->data[img_offset + x] * 255.0f),
@@ -95,23 +92,27 @@ void write_image32f(FILE* fp, Image32f* image)
             );
 		}
 	}
+}
 
+
+void write_image32f(FILE* fp, Image32f* image)
+{
+	BitmapImage bmp;
+	init_bitmap(&bmp, image->height, image->width);
+    image32f_to_bmp(&bmp, image);
 	write_bitmap(fp, &bmp);
     free_bitmap(&bmp);
 }
 
-void write_image8u(FILE* fp, Image8u *image) {
-    BitmapImage bmp;
-    init_bitmap(&bmp, image->height, image->width);
-
-    for (uint32_t y = 0; y < image->height; y++)
+void image8u_to_bmp(BitmapImage *bmp, Image8u* image) {
+      for (uint32_t y = 0; y < image->height; y++)
     {
-        uint32_t bmp_offset = y * bmp.bitmap.row_width;
+        uint32_t bmp_offset = y * bmp->bitmap.row_width;
         uint32_t img_offset = (y + image->offset) * image->stride + image->offset;
         for (uint32_t x = 0; x < image->width; x++)
         {
             bmp_set_offset(
-                &bmp.bitmap,
+                &bmp->bitmap,
                 bmp_offset + x * 3, 
                 image->data[img_offset + x],
                 image->data[img_offset + x],
@@ -119,7 +120,12 @@ void write_image8u(FILE* fp, Image8u *image) {
             );
         }
     }
+}
 
+void write_image8u(FILE* fp, Image8u *image) {
+    BitmapImage bmp;
+    init_bitmap(&bmp, image->height, image->width);
+    image8u_to_bmp(&bmp, image);
     write_bitmap(fp, &bmp);
     free_bitmap(&bmp);
 }

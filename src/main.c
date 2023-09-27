@@ -44,25 +44,25 @@ void process_bitmap(BitmapImage *image) {
         kernel_pass(out_ptr, in_ptr, &kernels.data[i]);
         SWAP(in_ptr, out_ptr)
 
-        printf("Run %d in_ptr is %p out_ptr is %p\n", i, in_ptr, out_ptr);
-
         if (pass_dir != NULL) {
             FILE* fp;
             char buff[512];
             sprintf(buff, "%s/kernel_pass_%u.bmp", pass_dir, i);
-
-            printf("Writing ptr %p to %s\n", in_ptr, buff); 
             DEBUG_IMAGE32F(in_ptr, buff);
         }
     } 
 
     destroy_image32f(out_ptr);
 
-    Image8u img;
+    Image8u grayscale;
 
-    init_image8u(&img, image->bitmap.width, image->bitmap.height, 32);
-    image8u_from_image32f(&img, in_ptr);
+    init_image8u(&grayscale, image->bitmap.width, image->bitmap.height, 32);
+    image8u_from_image32f(&grayscale, in_ptr);
     destroy_image32f(in_ptr);
+
+    image8u_to_bmp(image, &grayscale);
+
+    /*
 
     PeakVec peaks;
     vec_init(&peaks);
@@ -90,12 +90,15 @@ void process_bitmap(BitmapImage *image) {
         sprintf(buff, "%s/peaks.bmp", pass_dir);
         DEBUG_IMAGE8U(&img, buff);
 
-        /*sprintf(buff, "%s/debug.bmp", pass_dir);
-        DEBUG_BMP(&bmp, buff);*/
-    }
+        sprintf(buff, "%s/debug.bmp", pass_dir);
+        DEBUG_BMP(&bmp, buff);
 
-    destroy_image8u(&img);
+    }
     vec_free(&peaks);
+
+    //*/
+
+    destroy_image8u(&grayscale);
 }
 
 void process_samples() {
@@ -118,7 +121,6 @@ void process_samples() {
         process_bitmap(&inputImage);
         write_sample(samples[i]);
         free_sample(samples[i]);
-        break;
     }
 
     free(samples);

@@ -46,6 +46,8 @@ __attribute__((always_inline)) inline void image32f_set_pixel(Image32f *image, u
 
 void image8u_from_image32f(Image8u *dest, Image32f *src);
 void image32f_from_bmp(Image32f *dest, BitmapImage *src);
+void image8u_to_bmp(BitmapImage *dest, Image8u *src);
+void image32f_to_bmp(BitmapImage *dest, Image32f *src);
 void write_image32f(FILE* fp, Image32f* image);
 void write_image8u(FILE* fp, Image8u* image);
 
