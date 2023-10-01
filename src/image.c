@@ -13,6 +13,7 @@ void init_image1u(Image1u *image, uint32_t width, uint32_t height) {
     // Data contains 64 bit integers (8 bytes) for 64 pixels
     // 8 * width / 64 = width / 8
     image->length = ALIGN_8(height * width) / 8;
+// This is a constant allocation
     image->data = calloc(1, image->length * sizeof(uint64_t));
 }
 
@@ -25,6 +26,7 @@ void init_image8u(Image8u *image, uint32_t width, uint32_t height, uint32_t offs
     image->height = height;
     image->offset = ALIGN_32(offset);
     image->stride = width + 2 * image->offset;
+// This is a constant allocation
     image->data = calloc(1, image->stride * (image->height + 2 * image->offset));
 }
 
@@ -37,6 +39,7 @@ void init_image32f(Image32f *image, uint32_t width, uint32_t height, uint32_t of
     image->height = height;
     image->offset = ALIGN_32(offset);
     image->stride = width + 2 * image->offset;
+// This is a constant allocation
     image->data = calloc(1, image->stride * (image->height + 2 * image->offset) * sizeof(float));
 }
 

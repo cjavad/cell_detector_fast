@@ -129,6 +129,9 @@ void print_kernel(Kernel *kernel) {
     }
 }
 
+// This allocation is potentially constant time as defined
+// in main.c, but for the CLI application using malloc is 
+// required for custom input.
 #define KERNEL_INIT(kernel, size) \
     kernel->size = size; \
     kernel->data = malloc(size * size * sizeof(float)); \

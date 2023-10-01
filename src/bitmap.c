@@ -13,6 +13,8 @@ void read_bitmap(FILE* fp, BitmapImage* image)
 	uint32_t flen = ftell(fp);
 	fseek(fp, 0, SEEK_SET);
 
+// We know all the files have the same constant size
+// so this is also a constant allocation
 	void* file = malloc(flen);
 	fread(file, 1, flen, fp);
 
@@ -23,6 +25,8 @@ void read_bitmap(FILE* fp, BitmapImage* image)
 	image->bitmap.height	= image->infoHeader.height;
 	image->bitmap.byte_pp	= image->infoHeader.bpp >> 3;
 	image->bitmap.row_width = (image->bitmap.width * image->bitmap.byte_pp + 3) & (~3);
+
+// All our images have a constant size, so this can be a constant allocation
 	image->bitmap.data 		= malloc(image->bitmap.row_width * image->bitmap.height);
 
 	// if (bitmap->row_width * bitmap->height != infoHeader->image_size); // oh no
@@ -35,6 +39,8 @@ void read_bitmap(FILE* fp, BitmapImage* image)
 void write_bitmap(FILE *fp, BitmapImage *image) {
     // write bitmap
     uint32_t flen = image->header.offset + image->bitmap.row_width * image->bitmap.height;
+
+// This is also a constant allocation
     void* file = malloc(flen);
 
     memcpy(file, &image->header, sizeof(BitmapHeader));
@@ -73,6 +79,8 @@ void init_bitmap(BitmapImage* bmp, uint32_t width, uint32_t height)
     bmp->bitmap.height = height;
     bmp->bitmap.byte_pp = 3;
     bmp->bitmap.row_width = row_width;
+
+// This is also a constant allocation
     bmp->bitmap.data = calloc(1, bmp->bitmap.row_width * bmp->bitmap.height);
 }
 
@@ -99,6 +107,8 @@ void free_bitmap(BitmapImage *image) {
 
 void clone_bitmap(BitmapImage *dst, BitmapImage *src) {
     memcpy(dst, src, sizeof(BitmapImage));
+
+// This is also a constant allocation
     dst->bitmap.data = malloc(dst->bitmap.row_width * dst->bitmap.height);
     memcpy(dst->bitmap.data, src->bitmap.data, dst->bitmap.row_width * dst->bitmap.height);
 }

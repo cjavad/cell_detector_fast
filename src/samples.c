@@ -97,7 +97,9 @@ void get_samples(sample_t*** samples, uint32_t* count, uint8_t sample_type) {
 #ifdef _WIN32
     while (FindNextFile(find_context, &fd));  
 #endif
-    
+
+// The following allocations are not constant time
+// But we know the max size of the allocation beforehand    
     
     *count = i;
     *samples = malloc(sizeof(sample_t*) * i);
