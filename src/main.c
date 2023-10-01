@@ -239,7 +239,7 @@ void process_samples() {
     for (uint32_t i = 0; i < sample_count; i++) {
         char* name = samples[i]->sample_name;
         printf("Processing sample %s\n", name);
-;
+;                                                                      ;;
         FILE* fp = fopen(samples[i]->sample_path, "rb");
         BitmapImage inputImage;
         read_bitmap(fp, &inputImage);
