@@ -4,7 +4,7 @@
 #include <stdint.h>
 
 /**
-*  lextract ma jizle for them edges (and whites)
+*  log extract points for edges (and whites)
 */
 void lextract_points(point_list_t* whites, point_list_t* edges, BitmapData* bmp, uint32_t thold)
 {
