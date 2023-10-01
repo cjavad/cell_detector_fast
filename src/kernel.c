@@ -22,7 +22,7 @@
     #include <immintrin.h>
 #endif
 
-void kernel_instance(Image32f* out, Image32f* in, Kernel* kernel, int32_t cx, int32_t cy)
+__attribute__((always_inline)) inline void kernel_instance(Image32f* out, Image32f* in, Kernel* kernel, int32_t cx, int32_t cy)
 {
 	float sum = 0;
 
@@ -45,7 +45,7 @@ void kernel_instance(Image32f* out, Image32f* in, Kernel* kernel, int32_t cx, in
 }
 
 #ifdef SIMD
-void simd_instance(Image32f* out, Image32f* in, Kernel* kernel, int32_t cx, int32_t cy)
+__attribute__((always_inline)) inline void simd_instance(Image32f* out, Image32f* in, Kernel* kernel, int32_t cx, int32_t cy)
 {
     const float zero = 0.0f;
     const float one = 1.0f;
@@ -89,6 +89,7 @@ void kernel_pass(Image32f* out, Image32f* in, Kernel* kernel)
         {
             simd_instance(out, in, kernel, x, y);
         }
+        
         simd_instance(out, in, kernel, in->width - 8, y);
 #else
         for (; x < in->width; x++)

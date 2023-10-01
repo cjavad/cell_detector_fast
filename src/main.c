@@ -7,7 +7,6 @@
 
 #include "bitmap.h"
 #include "erode.h"
-#include "grayscale.h"
 #include "image.h"
 #include "peak.h"
 #include "samples.h"
