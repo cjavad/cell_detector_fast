@@ -13,8 +13,6 @@
 #include "peak.h"
 #include "samples.h"
 
-#include "process.h"
-
 #include "kernel.h"
 
 #include "fft.h"
