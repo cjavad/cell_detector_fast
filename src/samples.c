@@ -17,9 +17,11 @@ const char* SAMPLE_TYPES[] = {
     "impossible"
 };
 
+char SAMPLE_PATH[512] = "../../samples";
+char RESULT_PATH[512] = "./res";
 
 void resolve_sample_path(char* output, uint8_t sample_type, char* sample_name) {
-    sprintf(output, "../../samples/%s", SAMPLE_TYPES[sample_type]);
+    sprintf(output, "%s/%s", SAMPLE_PATH, SAMPLE_TYPES[sample_type]);
 
     if (sample_name) {
         sprintf(output + strlen(output), "/%s.bmp", sample_name);
@@ -27,7 +29,12 @@ void resolve_sample_path(char* output, uint8_t sample_type, char* sample_name) {
 }
 
 void resolve_output_path(char* output, uint8_t sample_type, char* sample_name) {
-    sprintf(output, "./res/%s", SAMPLE_TYPES[sample_type]);
+    // if directory does not exist, create it
+    if (mkdir(RESULT_PATH, 0777) == -1) {
+        // Directory already exists
+    }
+
+    sprintf(output, "%s/%s", RESULT_PATH, SAMPLE_TYPES[sample_type]);
 
     // if directory does not exist, create it
     if (mkdir(output, 0777) == -1) {

@@ -38,6 +38,8 @@
 #define OPT_OUTPUT 8
 #define OPT_PASS_DIR 9
 #define OPT_METHOD 10
+#define OPT_SAMPLE_DIR 11
+#define OPT_RESULT_DIR 12
 
 uint32_t mode = 0;
 
@@ -305,6 +307,9 @@ void create_kernel() {
     vec_push(&kernels, kernel);
 }
 
+extern char SAMPLE_PATH[512];
+extern char RESULT_PATH[512];
+
 int32_t main(int argc, char** argv)
 {
     vec_init(&kernels);
@@ -365,6 +370,18 @@ int32_t main(int argc, char** argv)
             continue;
         }
 
+        if (mode == OPT_SAMPLE_DIR) {
+            strcpy(SAMPLE_PATH, argv[i]);
+            mode = OPT_DEFAULT;
+            continue;
+        }
+
+        if (mode == OPT_RESULT_DIR) {
+            strcpy(RESULT_PATH, argv[i]);
+            mode = OPT_DEFAULT;
+            continue;
+        }
+
         if (strcmp(argv[i], "-h") == 0 || strcmp(argv[i], "--help") == 0) {
             mode = OPT_HELP;
             break;
@@ -414,6 +431,16 @@ int32_t main(int argc, char** argv)
             mode = OPT_PASS_DIR;
             continue;
         }
+
+        if (strcmp(argv[i], "-d") == 0 || strcmp(argv[i], "--sample-dir") == 0) {
+            mode = OPT_SAMPLE_DIR;
+            continue;
+        }
+
+        if (strcmp(argv[i], "-r") == 0 || strcmp(argv[i], "--result-dir") == 0) {
+            mode = OPT_RESULT_DIR;
+            continue;
+        }
     }
 
     if (kernel_type != 0) create_kernel();
@@ -432,6 +459,8 @@ int32_t main(int argc, char** argv)
         printf("  -i --input\t Set input file\n");
         printf("  -o --output\t Set output file\n");
         printf("  -p --pass-dir\t Set pass directory\n");
+        printf("  -d --sample-dir\t Set sample directory\n");
+        printf("  -r --result-dir\t Set result directory\n");
 
         // Print sample types
         printf("Sample types:\n");
