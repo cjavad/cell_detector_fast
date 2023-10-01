@@ -89,13 +89,13 @@ void kernel_pass(Image32f* out, Image32f* in, Kernel* kernel)
         {
             simd_instance(out, in, kernel, x, y);
         }
-
-#endif
-
+        simd_instance(out, in, kernel, in->width - 8, y);
+#else
         for (; x < in->width; x++)
         {
             kernel_instance(out, in, kernel, x, y);
         }
+#endif
     }
 }
 
