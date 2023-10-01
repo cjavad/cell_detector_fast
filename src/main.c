@@ -18,7 +18,7 @@
 #include "kernel.h"
 
 #include "fft.h"
-#include "swizle.h"
+#include "lextract.h"
 #include "vec.h"
 
 #include "grad.h"
@@ -78,12 +78,12 @@ void erode(point_list_t* cells, BitmapImage* image, Image8u* grayscale_ptr, Imag
     vec_init(&whites);
     vec_init(&edges);
 
-    swizle_ma_jizle(&whites, &edges, &image->bitmap, 88);
+    lextract_points(&whites, &edges, &image->bitmap, 88);
 
-    swizle_ma_edges(grayscale_ptr, buffer_ptr, &edges, 60);
+    lextract_edges(grayscale_ptr, buffer_ptr, &edges, 60);
     memset(buffer_ptr->data, 0, buffer_ptr->stride * (buffer_ptr->height + 2 * buffer_ptr->offset));
 
-    swizle_ma_whites(buffer_ptr, grayscale_ptr, &whites);
+    lextract_whites(buffer_ptr, grayscale_ptr, &whites);
     memset(grayscale_ptr->data, 0, grayscale_ptr->stride * (grayscale_ptr->height + 2 * grayscale_ptr->offset));
 
     for (uint32_t i = 0; whites.len > 0; i++) {

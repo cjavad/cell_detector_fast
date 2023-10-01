@@ -1,12 +1,12 @@
-#include "swizle.h"
+#include "lextract.h"
 #include "image.h"
 #include "vec.h"
 #include <stdint.h>
 
 /**
-*  Swizle ma jizle for them edges (and whites)
+*  lextract ma jizle for them edges (and whites)
 */
-void swizle_ma_jizle(point_list_t* whites, point_list_t* edges, BitmapData* bmp, uint32_t thold)
+void lextract_points(point_list_t* whites, point_list_t* edges, BitmapData* bmp, uint32_t thold)
 {
 	for (uint32_t y = 0; y < bmp->height; y++)
 	{
@@ -31,7 +31,7 @@ void swizle_ma_jizle(point_list_t* whites, point_list_t* edges, BitmapData* bmp,
 /**
 * Flood fill for every edge point, only copy found pixels to output.
 */
-void swizle_ma_edges(Image8u *output, Image8u *input, point_list_t *edges, uint32_t thold) {    
+void lextract_edges(Image8u *output, Image8u *input, point_list_t *edges, uint32_t thold) {    
     point_list_t stack;
     vec_init(&stack);
     
@@ -61,7 +61,7 @@ void swizle_ma_edges(Image8u *output, Image8u *input, point_list_t *edges, uint3
 /**
 * Invert based on whites.
 */
-void swizle_ma_whites(Image8u* output, Image8u* input, point_list_t* whites) {
+void lextract_whites(Image8u* output, Image8u* input, point_list_t* whites) {
     for (uint32_t i = 0; i < whites->len; i++) {
         point_t p = whites->data[i];
         image8u_set_pixel(output, p.x, p.y, 255 - image8u_get_pixel(input, p.x, p.y));

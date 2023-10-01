@@ -1,6 +1,6 @@
 #include "erode.h"
 #include "image.h"
-#include "swizle.h"
+#include "lextract.h"
 #include "vec.h"
 #include <stdint.h>
 #include <stdio.h>
