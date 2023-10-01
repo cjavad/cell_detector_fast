@@ -51,7 +51,7 @@ purge: clean
 
 clean:
 	@rm -rf $(BINDIR)/$(EXECUTABLE)
-	@rm -rf $(OBJDIR)	
+	@rm -rf $(OBJDIR)
 
 clear_build_log:
 	@:>build.log

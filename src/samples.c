@@ -4,6 +4,8 @@
 #include <stdlib.h>
 
 #ifdef _WIN32
+    #define WIN32_LEAN_AND_MEAN
+    #include <windows.h>
     #include <direct.h>
     #define mkdir(path, mod) _mkdir(path)
 #else 
@@ -50,7 +52,18 @@ void get_samples(sample_t*** samples, uint32_t* count, uint8_t sample_type) {
     char path[512];
 
     resolve_sample_path(path, sample_type, NULL);
+#ifdef _WIN32
+    char wpath[512];
+    resolve_sample_path(wpath, sample_type, "*");
     
+    WIN32_FIND_DATA fd;
+    HANDLE find_context;
+
+    if ((find_context = FindFirstFile(wpath, &fd)) == INVALID_HANDLE_VALUE) {
+        printf("Could not open directory %s\n", path);
+        exit(1);
+    }
+#else
     DIR* d = opendir(path);
     struct dirent* dir;
 
@@ -58,35 +71,57 @@ void get_samples(sample_t*** samples, uint32_t* count, uint8_t sample_type) {
         printf("Could not open directory %s\n", path);
         exit(1);
     }
-
+#endif
+    
     uint32_t i = 0;
-
-    // Preallocate the array
+    
+    // preallocate the array
+#ifdef _WIN32
+    
+    do {
+        if (fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) continue;
+        
+        char* name = fd.cFileName;
+#else
     while ((dir = readdir(d)) != NULL) {
         if (dir->d_type != DT_REG) continue;
 
         char* name = dir->d_name;
+#endif
         char* ext = name + strlen(name) - 4;
-
+        
         if (strcmp(ext, ".bmp") != 0) continue;
-
-        i++;
+        
+        i++;            
     }
-
+#ifdef _WIN32
+    while (FindNextFile(find_context, &fd));  
+#endif
+    
+    
     *count = i;
     *samples = malloc(sizeof(sample_t*) * i);
-
-    rewinddir(d);
-
+    
     i = 0;
-
+    
+#ifdef _WIN32
+    find_context = FindFirstFile(wpath, &fd);
+    do
+    {
+        if (fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) continue;
+        
+        char* name = fd.cFileName;
+#else
+    rewinddir(d);
+    
     while ((dir = readdir(d)) != NULL) {
         if (dir->d_type != DT_REG) continue;
 
         char* name = dir->d_name;
+#endif
         uint32_t len = strlen(name);
-        char* ext = name + len - 4;
-
+        char* ext = name + strlen(name) - 4;
+        
         if (strcmp(ext, ".bmp") != 0) continue;
 
         (*samples)[i] = malloc(sizeof(sample_t));
@@ -104,8 +139,11 @@ void get_samples(sample_t*** samples, uint32_t* count, uint8_t sample_type) {
 
         i++;
     }
-
+#ifdef _WIN32
+    while (FindNextFile(find_context, &fd));
+#else
     closedir(d);
+#endif    
 }
 
 void write_sample(sample_t *sample) {
