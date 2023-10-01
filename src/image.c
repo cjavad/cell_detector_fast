@@ -44,7 +44,6 @@ void destroy_image32f(Image32f *image) {
     free(image->data);
 }
 
-
 void image1u_from_image32f(Image1u *dest, Image32f *src, float threshold) {
     for (uint32_t y = 0; y < src->height; y++)
     {

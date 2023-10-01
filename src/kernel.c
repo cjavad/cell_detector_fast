@@ -5,8 +5,9 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <math.h>
 #include <xmmintrin.h>
+
+#define PI 3.14159265358979323846
 
 #define max(a, b) ((a) > (b) ? (a) : (b))
 #define min(a, b) ((a) < (b) ? (a) : (b))
@@ -153,7 +154,7 @@ void init_gaussian_kernel(Kernel* kernel, int32_t size, float scale) {
             float d = dx * dx + dy * dy;
             float t = 2.0f * scale * scale;
 
-            kernel->data[y * size + x] = expf(-d / t) / (2.0f * M_PI * t);
+            kernel->data[y * size + x] = expf(-d / t) / (2.0f * PI * t);
             KERNEL_NORM_INC(kernel, size, x, y)
         }
     }
@@ -231,7 +232,7 @@ void init_log_kernel(Kernel *kernel, int32_t size, float sigma, float scale)
             // 2 * sigma**2
             float t = 2.0f * sigma * sigma;
 
-            kernel->data[y * size + x] = scale * (-1.0f / (M_PI * sigma * sigma * sigma * sigma)) * (1.0f - (d / t)) * expf(-d / t);
+            kernel->data[y * size + x] = scale * (-1.0f / (PI * sigma * sigma * sigma * sigma)) * (1.0f - (d / t)) * expf(-d / t);
         }
     }
 }
