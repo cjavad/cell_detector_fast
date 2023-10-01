@@ -3,7 +3,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/stat.h>
 #include <sys/types.h>
 
 #include "bitmap.h"
@@ -21,6 +20,12 @@
 
 #include "grad.h"
 
+#ifdef _WIN32
+    #include <direct.h>
+    #define mkdir(path, mod) _mkdir(path)
+#else
+    #include <sys/stat.h>
+#endif
 
 #define OPT_DEFAULT 0
 #define OPT_HELP 1

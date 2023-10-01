@@ -12,6 +12,10 @@
 #define min(a, b) ((a) < (b) ? (a) : (b))
 #define clamp(x, a, b) (max(min(x, b), a))
 
+#ifndef M_PI
+    #define M_PI 3.14159265358979323846
+#endif
+
 #define SIMD
 
 #ifdef SIMD

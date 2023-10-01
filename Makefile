@@ -108,10 +108,10 @@ $(DEPDIR)/%.d: $(SRCDIR)/%.c
 	@$(CC) $(IFLAGS) -MM -MT $(patsubst $(DEPDIR)/%.d, $(OBJDIR)/%.o, $@) $(patsubst $(DEPDIR)/%.d, $(SRCDIR)/%.c, $@) >> $@ || rm $@
 	@echo $(CC) $(IFLAGS) -MM -MT $(patsubst $(DEPDIR)/%.d, $(OBJDIR)/%.o, $@) $(patsubst $(DEPDIR)/%.d, $(SRCDIR)/%.c, $@)
 # 	i hate this, clang on windows insists on not using / in filepaths
-	@if [ $(WINDOWS) ]; then \
-		sed -i "s/\\\\/\\//g" $@;\
-		sed -i "s/[[:space:]]\\// \\\\/g" $@;\
-	fi
+#	@if [ $(WINDOWS) ]; then \
+#		sed -i "s/\\\\/\\//g" $@;\
+#		sed -i "s/[[:space:]]\\// \\\\/g" $@;\
+#	fi
 
 #build object files
 $(OBJDIR)/%.o:
